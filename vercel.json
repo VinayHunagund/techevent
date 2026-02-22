@@ -2,34 +2,14 @@
   "version": 2,
   "builds": [
     {
-      "src": "public/**",
-      "use": "@vercel/static"
-    },
-    {
-      "src": "api/**/*.js",
+      "src": "server.js",
       "use": "@vercel/node"
     }
   ],
   "routes": [
     {
-      "src": "/api/register-team",
-      "dest": "/api/register-team.js"
-    },
-    {
-      "src": "/api/questions",
-      "dest": "/api/questions.js"
-    },
-    {
-      "src": "/api/submit",
-      "dest": "/api/submit.js"
-    },
-    {
-      "src": "/api/admin-submissions",
-      "dest": "/api/admin-submissions.js"
-    },
-    {
       "src": "/(.*)",
-      "dest": "/public/$1"
+      "dest": "server.js"
     }
   ]
 }
