@@ -1,6 +1,5 @@
 const express = require('express');
 const bodyParser = require('body-parser');
-const initSqlJs = require('sql.js');
 const fs = require('fs');
 const path = require('path');
 const os = require('os');
@@ -8,16 +7,56 @@ const os = require('os');
 const app = express();
 const PORT = 5000;
 
+// Check environment
+const isVercel = process.env.VERCEL === '1';
+const useTurso = !!process.env.TURSO_DATABASE_URL;
+
 // Middleware
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(express.static(path.join(__dirname, 'public')));
 app.use('/admin', express.static(path.join(__dirname, 'admin')));
 
-// Initialize DB eagerly
+// ========== DATABASE ABSTRACTION LAYER ==========
+let sqlJsDb = null;
+let tursoClient = null;
+
+// Execute SQL and return results in consistent format: [{columns, values}]
+async function dbExec(sql) {
+  if (useTurso) {
+    const result = await tursoClient.execute(sql);
+    if (!result.rows || result.rows.length === 0) return [];
+    return [{
+      columns: result.columns,
+      values: result.rows.map(row => result.columns.map((_, i) => row[i]))
+    }];
+  } else {
+    return sqlJsDb.exec(sql);
+  }
+}
+
+// Execute SQL with parameters (INSERT, UPDATE, DELETE)
+async function dbRun(sql, params = []) {
+  if (useTurso) {
+    await tursoClient.execute({ sql, args: params });
+  } else {
+    sqlJsDb.run(sql, params);
+  }
+}
+
+// Save database to file (sql.js only; Turso auto-persists)
+function saveDb() {
+  if (!useTurso && sqlJsDb) {
+    const data = sqlJsDb.export();
+    const dbFilePath = path.join(__dirname, 'database.db');
+    fs.writeFileSync(dbFilePath, Buffer.from(data));
+  }
+}
+
+// ========== DATABASE INITIALIZATION ==========
 let dbReady = null;
 
-// Ensure DB is ready before each API request (for Vercel cold starts)
+// Ensure DB is ready before each API request
 app.use('/api', async (req, res, next) => {
   if (dbReady) await dbReady;
   next();
@@ -28,34 +67,32 @@ app.get('/', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
 
-// Initialize SQLite Database
-let db;
-// On Vercel, use /tmp for writable storage; locally use project root
-const isVercel = process.env.VERCEL === '1';
-const dbPath = isVercel ? '/tmp/database.db' : path.join(__dirname, 'database.db');
-const bundledDbPath = path.join(__dirname, 'database.db');
-
-// Initialize database async
 async function initDatabase() {
-  const SQL = await initSqlJs({
-    locateFile: file => path.join(__dirname, 'node_modules', 'sql.js', 'dist', file)
-  });
-
-  // Load existing database or create new one
-  if (fs.existsSync(dbPath)) {
-    const buffer = fs.readFileSync(dbPath);
-    db = new SQL.Database(buffer);
-  } else if (isVercel && fs.existsSync(bundledDbPath)) {
-    // On Vercel first run, copy bundled DB to /tmp
-    const buffer = fs.readFileSync(bundledDbPath);
-    db = new SQL.Database(buffer);
+  // Initialize database connection
+  if (useTurso) {
+    const { createClient } = require('@libsql/client');
+    tursoClient = createClient({
+      url: process.env.TURSO_DATABASE_URL,
+      authToken: process.env.TURSO_AUTH_TOKEN,
+    });
+    console.log('Using Turso cloud database');
   } else {
-    db = new SQL.Database();
+    const initSqlJs = require('sql.js');
+    const dbFilePath = path.join(__dirname, 'database.db');
+    const SQL = await initSqlJs({
+      locateFile: file => path.join(__dirname, 'node_modules', 'sql.js', 'dist', file)
+    });
+    if (fs.existsSync(dbFilePath)) {
+      sqlJsDb = new SQL.Database(fs.readFileSync(dbFilePath));
+    } else {
+      sqlJsDb = new SQL.Database();
+    }
+    console.log('Using local SQLite database');
   }
 
-  // Create tables if not exists
-  db.run(`
-    CREATE TABLE IF NOT EXISTS questions (
+  // Create tables
+  const createTableStatements = [
+    `CREATE TABLE IF NOT EXISTS questions (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
       round_number INTEGER NOT NULL,
       question_text TEXT NOT NULL,
@@ -63,9 +100,8 @@ async function initDatabase() {
       options TEXT,
       correct_answer TEXT NOT NULL,
       marks INTEGER NOT NULL
-    );
-
-    CREATE TABLE IF NOT EXISTS submissions (
+    )`,
+    `CREATE TABLE IF NOT EXISTS submissions (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
       team_name TEXT NOT NULL,
       round_number INTEGER NOT NULL,
@@ -75,50 +111,53 @@ async function initDatabase() {
       ip_address TEXT,
       time_taken INTEGER DEFAULT 0,
       UNIQUE(team_name, round_number)
-    );
-
-    CREATE TABLE IF NOT EXISTS settings (
+    )`,
+    `CREATE TABLE IF NOT EXISTS settings (
       key TEXT PRIMARY KEY,
       value TEXT NOT NULL
-    );
-
-    CREATE TABLE IF NOT EXISTS round_timers (
+    )`,
+    `CREATE TABLE IF NOT EXISTS round_timers (
       round_number INTEGER PRIMARY KEY,
       timer_minutes INTEGER NOT NULL
-    );
-
-    CREATE TABLE IF NOT EXISTS teams (
+    )`,
+    `CREATE TABLE IF NOT EXISTS teams (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
       team_name TEXT NOT NULL UNIQUE,
       registered_at TEXT NOT NULL,
       ip_address TEXT
-    );
-  `);
+    )`
+  ];
+
+  if (useTurso) {
+    await tursoClient.batch(createTableStatements, 'write');
+  } else {
+    sqlJsDb.run(createTableStatements.join(';\n'));
+  }
 
   // Insert sample questions if empty
-  const questionCount = db.exec('SELECT COUNT(*) as count FROM questions');
+  const questionCount = await dbExec('SELECT COUNT(*) as count FROM questions');
   if (!questionCount[0] || questionCount[0].values[0][0] === 0) {
     // ============ ROUND 1 - SQL Query Questions ============
 
     // Query 1: Most Frequent Demand Level
-    db.run(`INSERT INTO questions (round_number, question_text, type, options, correct_answer, marks) VALUES (?, ?, ?, ?, ?, ?)`,
+    await dbRun(`INSERT INTO questions (round_number, question_text, type, options, correct_answer, marks) VALUES (?, ?, ?, ?, ?, ?)`,
       [1, '1. Most Frequent Demand Level\n\nSELECT demand_level\nFROM AI_Predictions\nGROUP BY demand_level\nORDER BY COUNT(*) DESC\nLIMIT 1;',
         'text', null, JSON.stringify(['High', 'high']), 10]);
 
     // Query 2: Loyalty Level Generating Highest Revenue
-    db.run(`INSERT INTO questions (round_number, question_text, type, options, correct_answer, marks) VALUES (?, ?, ?, ?, ?, ?)`,
+    await dbRun(`INSERT INTO questions (round_number, question_text, type, options, correct_answer, marks) VALUES (?, ?, ?, ?, ?, ?)`,
       [1, '2. Loyalty Level Generating Highest Revenue\n\nSELECT c.loyalty_level\nFROM Customers c\nJOIN Orders o ON c.customer_id = o.customer_id\nGROUP BY c.loyalty_level\nORDER BY SUM(o.total_amount) DESC\nLIMIT 1;',
         'text', null, JSON.stringify(['Platinum', 'platinum']), 10]);
 
     // ============ ROUND 2 - Algorithm & DSA Challenge ============
 
     // Logic Reconstruction Question
-    db.run(`INSERT INTO questions (round_number, question_text, type, options, correct_answer, marks) VALUES (?, ?, ?, ?, ?, ?)`,
-      [2, 'Logic Reconstruction\n\nProblem Statement:\nArrange the following shuffled steps to form a complete algorithm that determines the minimum number of platforms required at a railway station so that no train has to wait.\n\nArrival[] and Departure[] times of trains are given.\n\nJumbled Process:\nA. Initialize platforms_needed = 0 and max_platforms = 0\nB. If next arrival time ≤ next departure time\nC. Increment platforms_needed\nD. Decrement platforms_needed\nE. Sort arrival[] and departure[] arrays separately\nF. Move arrival pointer forward\nG. Move departure pointer forward\nH. Update max_platforms = max(max_platforms, platforms_needed)\nI. Start\nJ. While both pointers are within array length\nK. Stop and print max_platforms\nL. Initialize two pointers i = 0, j = 0\n\nWrite the correct sequence (e.g., I, E, L, A, J...)',
+    await dbRun(`INSERT INTO questions (round_number, question_text, type, options, correct_answer, marks) VALUES (?, ?, ?, ?, ?, ?)`,
+      [2, 'Logic Reconstruction\n\nProblem Statement:\nArrange the following shuffled steps to form a complete algorithm that determines the minimum number of platforms required at a railway station so that no train has to wait.\n\nArrival[] and Departure[] times of trains are given.\n\nJumbled Process:\nA. Initialize platforms_needed = 0 and max_platforms = 0\nB. If next arrival time \u2264 next departure time\nC. Increment platforms_needed\nD. Decrement platforms_needed\nE. Sort arrival[] and departure[] arrays separately\nF. Move arrival pointer forward\nG. Move departure pointer forward\nH. Update max_platforms = max(max_platforms, platforms_needed)\nI. Start\nJ. While both pointers are within array length\nK. Stop and print max_platforms\nL. Initialize two pointers i = 0, j = 0\n\nWrite the correct sequence (e.g., I, E, L, A, J...)',
         'text', null, JSON.stringify(['IELAJ', 'I,E,L,A,J', 'I E L A J']), 10]);
 
     // DSA Question 2
-    db.run(`INSERT INTO questions (round_number, question_text, type, options, correct_answer, marks) VALUES (?, ?, ?, ?, ?, ?)`,
+    await dbRun(`INSERT INTO questions (round_number, question_text, type, options, correct_answer, marks) VALUES (?, ?, ?, ?, ?, ?)`,
       [2, 'DSA Problem - Question 2\n\nWhat is the output of the following code snippet?\n\nint main() {\n    static int x = 0;\n    if(x++ < 3) {\n        printf("hi ");\n        main();\n    }\n}',
         'mcq', JSON.stringify(['hi', 'hihihi', 'hihihihi', 'Infinite "hi" until crash']),
         'hihihihi', 10]);
@@ -126,62 +165,53 @@ async function initDatabase() {
     // ============ ROUND 3 - Cloud Data Processing Center ============
 
     // Question 1: Identify the scheduling algorithm
-    db.run(`INSERT INTO questions (round_number, question_text, type, options, correct_answer, marks) VALUES (?, ?, ?, ?, ?, ?)`,
+    await dbRun(`INSERT INTO questions (round_number, question_text, type, options, correct_answer, marks) VALUES (?, ?, ?, ?, ?, ?)`,
       [3, '1. Identify the Scheduling Algorithm\n\nA cloud-based data processing company operates a single high-performance server that handles client data analysis jobs. The server can execute only one job at a time.\n\nThe scheduling policy followed by the server has the following characteristics:\n- At any moment, the job with the shortest remaining processing time is selected.\n- If a new job arrives with a shorter remaining time than the currently running job, the running job is preempted.\n- If two jobs have the same remaining time, the job that arrived earlier is selected.\n\nWhat is the name of this scheduling algorithm?',
         'text', null, JSON.stringify(['Shortest Remaining Time First', 'SRTF', 'shortest remaining time first', 'srtf']), 10]);
 
     // Question 2: Average Waiting Time
-    db.run(`INSERT INTO questions (round_number, question_text, type, options, correct_answer, marks) VALUES (?, ?, ?, ?, ?, ?)`,
+    await dbRun(`INSERT INTO questions (round_number, question_text, type, options, correct_answer, marks) VALUES (?, ?, ?, ?, ?, ?)`,
       [3, '2. Find the Average Waiting Time\n\nGiven the following jobs arriving at the server:\n\nJob ID          | Arrival Time (ms) | Processing Time (ms)\n----------------|-------------------|---------------------\nClient Job 1    | 0                 | 7\nClient Job 2    | 2                 | 4\nClient Job 3    | 4                 | 1\nClient Job 4    | 5                 | 4\nClient Job 5    | 6                 | 2\n\nUsing Shortest Remaining Time First (SRTF) scheduling, calculate the Average Waiting Time for all five jobs.',
         'text', null, JSON.stringify(['3', '3.0', '3ms', '3 ms', '3 milliseconds']), 10]);
 
     // Question 3: Average Turnaround Time
-    db.run(`INSERT INTO questions (round_number, question_text, type, options, correct_answer, marks) VALUES (?, ?, ?, ?, ?, ?)`,
+    await dbRun(`INSERT INTO questions (round_number, question_text, type, options, correct_answer, marks) VALUES (?, ?, ?, ?, ?, ?)`,
       [3, '3. Find the Average Turnaround Time\n\nGiven the same job data:\n\nJob ID          | Arrival Time (ms) | Processing Time (ms)\n----------------|-------------------|---------------------\nClient Job 1    | 0                 | 7\nClient Job 2    | 2                 | 4\nClient Job 3    | 4                 | 1\nClient Job 4    | 5                 | 4\nClient Job 5    | 6                 | 2\n\nUsing SRTF scheduling, calculate the Average Turnaround Time for all five jobs.',
         'text', null, JSON.stringify(['7', '7.0', '7ms', '7 ms', '7 milliseconds']), 10]);
 
     // Question 4: Starvation Problem
-    db.run(`INSERT INTO questions (round_number, question_text, type, options, correct_answer, marks) VALUES (?, ?, ?, ?, ?, ?)`,
+    await dbRun(`INSERT INTO questions (round_number, question_text, type, options, correct_answer, marks) VALUES (?, ?, ?, ?, ?, ?)`,
       [3, '4. Technical Name\n\nA cloud server is using Shortest Remaining Time First (SRTF) to process incoming data requests. Throughout the day, thousands of tiny 1ms "status check" packets arrive every millisecond. Meanwhile, a single 10GB "system backup" task has been sitting in the queue for 24 hours without processing a single byte.\n\nWhat is the technical name for the condition this backup task is experiencing?',
         'text', null, JSON.stringify(['Starvation', 'starvation', 'Process Starvation', 'process starvation', 'Indefinite Blocking', 'indefinite blocking']), 10]);
 
     // ============ ROUND 4 - Flowchart Analysis ============
 
     // Flowchart 1: Right Triangle Pattern
-    db.run(`INSERT INTO questions (round_number, question_text, type, options, correct_answer, marks) VALUES (?, ?, ?, ?, ?, ?)`,
+    await dbRun(`INSERT INTO questions (round_number, question_text, type, options, correct_answer, marks) VALUES (?, ?, ?, ?, ?, ?)`,
       [4, 'Question 1: Refer to Flowchart 1\n\nSelect suitable input and describe the final output of Flowchart 1 in textual format.',
         'text', null, JSON.stringify(['*\n**\n***\n****', '*\\n**\\n***\\n****']), 10]);
 
     // Flowchart 2: Armstrong Number Check
-    db.run(`INSERT INTO questions (round_number, question_text, type, options, correct_answer, marks) VALUES (?, ?, ?, ?, ?, ?)`,
+    await dbRun(`INSERT INTO questions (round_number, question_text, type, options, correct_answer, marks) VALUES (?, ?, ?, ?, ?, ?)`,
       [4, 'Question 2: Refer to Flowchart 2\n\nWhat is Flowchart 2 designed to determine?',
         'text', null, JSON.stringify(['Armstrong Number', 'armstrong number', 'Armstrong', 'armstrong', 'Narcissistic Number', 'narcissistic number']), 10]);
 
     // Set round timers
-    db.run('INSERT INTO round_timers (round_number, timer_minutes) VALUES (?, ?)', [1, 25]);
-    db.run('INSERT INTO round_timers (round_number, timer_minutes) VALUES (?, ?)', [2, 25]);
-    db.run('INSERT INTO round_timers (round_number, timer_minutes) VALUES (?, ?)', [3, 25]);
-    db.run('INSERT INTO round_timers (round_number, timer_minutes) VALUES (?, ?)', [4, 25]);
+    await dbRun('INSERT INTO round_timers (round_number, timer_minutes) VALUES (?, ?)', [1, 25]);
+    await dbRun('INSERT INTO round_timers (round_number, timer_minutes) VALUES (?, ?)', [2, 25]);
+    await dbRun('INSERT INTO round_timers (round_number, timer_minutes) VALUES (?, ?)', [3, 25]);
+    await dbRun('INSERT INTO round_timers (round_number, timer_minutes) VALUES (?, ?)', [4, 25]);
 
-    saveDatabase();
+    saveDb();
     console.log('All rounds inserted: Round 1 (SQL), Round 2 (Algorithm & DSA), Round 3 (Cloud Data Processing), Round 4 (Flowchart Analysis)');
   }
 
-
-
   // Remove old timer setting
-  const oldTimer = db.exec('SELECT value FROM settings WHERE key = "timer_minutes"');
+  const oldTimer = await dbExec('SELECT value FROM settings WHERE key = "timer_minutes"');
   if (oldTimer[0] && oldTimer[0].values.length > 0) {
-    db.run('DELETE FROM settings WHERE key = ?', ['timer_minutes']);
-    saveDatabase();
+    await dbRun('DELETE FROM settings WHERE key = ?', ['timer_minutes']);
+    saveDb();
   }
-}
-
-// Save database to file
-function saveDatabase() {
-  const data = db.export();
-  const buffer = Buffer.from(data);
-  fs.writeFileSync(dbPath, buffer);
 }
 
 // Helper function to normalize text for comparison
@@ -218,7 +248,7 @@ function checkAnswer(userAnswer, correctAnswerData, questionType) {
 }
 
 // API: Register team
-app.post('/api/register-team', (req, res) => {
+app.post('/api/register-team', async (req, res) => {
   try {
     const { teamName } = req.body;
     const ipAddress = req.ip || req.connection.remoteAddress;
@@ -230,9 +260,9 @@ app.post('/api/register-team', (req, res) => {
     const registeredAt = new Date().toISOString();
 
     try {
-      db.run(`INSERT INTO teams (team_name, registered_at, ip_address) VALUES (?, ?, ?)`,
+      await dbRun(`INSERT INTO teams (team_name, registered_at, ip_address) VALUES (?, ?, ?)`,
         [teamName.trim(), registeredAt, ipAddress]);
-      saveDatabase();
+      saveDb();
       res.json({ success: true, message: 'Team registered successfully' });
     } catch (err) {
       // Team already exists
@@ -245,12 +275,12 @@ app.post('/api/register-team', (req, res) => {
 });
 
 // API: Get questions (without correct answers) - filtered by round
-app.get('/api/questions', (req, res) => {
+app.get('/api/questions', async (req, res) => {
   try {
     const roundNumber = parseInt(req.query.round) || 1;
 
-    const result = db.exec(`SELECT id, question_text, type, options, marks FROM questions WHERE round_number = ${roundNumber} ORDER BY id`);
-    const timerResult = db.exec(`SELECT timer_minutes FROM round_timers WHERE round_number = ${roundNumber}`);
+    const result = await dbExec(`SELECT id, question_text, type, options, marks FROM questions WHERE round_number = ${roundNumber} ORDER BY id`);
+    const timerResult = await dbExec(`SELECT timer_minutes FROM round_timers WHERE round_number = ${roundNumber}`);
 
     const questions = result[0] ? result[0].values.map(row => ({
       id: row[0],
@@ -277,7 +307,7 @@ app.get('/api/questions', (req, res) => {
 });
 
 // API: Submit answers
-app.post('/api/submit', (req, res) => {
+app.post('/api/submit', async (req, res) => {
   try {
     const { teamName, roundNumber, answers, timeTaken } = req.body;
     const ipAddress = req.ip || req.connection.remoteAddress;
@@ -296,13 +326,13 @@ app.post('/api/submit', (req, res) => {
     }
 
     // Check if team already submitted for this round
-    const existingResult = db.exec(`SELECT id FROM submissions WHERE team_name = '${teamName.trim().replace(/'/g, "''")}' AND round_number = ${roundNumber}`);
+    const existingResult = await dbExec(`SELECT id FROM submissions WHERE team_name = '${teamName.trim().replace(/'/g, "''")}' AND round_number = ${roundNumber}`);
     if (existingResult[0] && existingResult[0].values.length > 0) {
       return res.status(400).json({ success: false, message: `This team has already submitted answers for Round ${roundNumber}` });
     }
 
     // Get all questions with correct answers
-    const questionsResult = db.exec('SELECT id, type, correct_answer, marks FROM questions');
+    const questionsResult = await dbExec('SELECT id, type, correct_answer, marks FROM questions');
     const questions = questionsResult[0] ? questionsResult[0].values.map(row => ({
       id: row[0],
       type: row[1],
@@ -322,10 +352,10 @@ app.post('/api/submit', (req, res) => {
     // Save submission with current local timestamp and time taken
     const submittedAt = new Date().toISOString();
     const timeTakenSeconds = timeTaken || 0;
-    db.run(`INSERT INTO submissions (team_name, round_number, answers, score, submitted_at, ip_address, time_taken) VALUES (?, ?, ?, ?, ?, ?, ?)`,
+    await dbRun(`INSERT INTO submissions (team_name, round_number, answers, score, submitted_at, ip_address, time_taken) VALUES (?, ?, ?, ?, ?, ?, ?)`,
       [teamName.trim(), roundNumber, JSON.stringify(answers), totalScore, submittedAt, ipAddress, timeTakenSeconds]);
 
-    saveDatabase();
+    saveDb();
 
     res.json({
       success: true,
@@ -340,21 +370,21 @@ app.post('/api/submit', (req, res) => {
 });
 
 // API: Admin - Get all submissions
-app.get('/api/admin/submissions', (req, res) => {
+app.get('/api/admin/submissions', async (req, res) => {
   try {
-    const submissionsResult = db.exec(`
+    const submissionsResult = await dbExec(`
       SELECT id, team_name, round_number, answers, score, submitted_at, ip_address, time_taken 
       FROM submissions 
       ORDER BY round_number ASC, score DESC, submitted_at ASC
     `);
 
-    const teamsResult = db.exec(`
+    const teamsResult = await dbExec(`
       SELECT team_name, registered_at, ip_address 
       FROM teams 
       ORDER BY registered_at ASC
     `);
 
-    const questionsResult = db.exec('SELECT id, question_text, type, correct_answer, marks, round_number FROM questions');
+    const questionsResult = await dbExec('SELECT id, question_text, type, correct_answer, marks, round_number FROM questions');
 
     const submissions = submissionsResult[0] ? submissionsResult[0].values.map(row => ({
       id: row[0],
@@ -379,7 +409,7 @@ app.get('/api/admin/submissions', (req, res) => {
       type: row[2],
       correctAnswer: row[2] === 'mcq' ? row[3] : JSON.parse(row[3]),
       marks: row[4],
-      roundNumber: row[5]  // Include round_number from database
+      roundNumber: row[5]
     })) : [];
 
     res.json({
@@ -395,7 +425,7 @@ app.get('/api/admin/submissions', (req, res) => {
 });
 
 // API: Admin - Update score manually
-app.post('/api/admin/update-score', (req, res) => {
+app.post('/api/admin/update-score', async (req, res) => {
   try {
     const { teamName, roundNumber, newScore } = req.body;
 
@@ -403,9 +433,9 @@ app.post('/api/admin/update-score', (req, res) => {
       return res.status(400).json({ success: false, message: 'Team name, round number, and score are required' });
     }
 
-    db.run(`UPDATE submissions SET score = ? WHERE team_name = ? AND round_number = ?`,
+    await dbRun(`UPDATE submissions SET score = ? WHERE team_name = ? AND round_number = ?`,
       [parseInt(newScore), teamName, parseInt(roundNumber)]);
-    saveDatabase();
+    saveDb();
 
     res.json({ success: true, message: 'Score updated successfully' });
   } catch (error) {
@@ -415,7 +445,7 @@ app.post('/api/admin/update-score', (req, res) => {
 });
 
 // API: Admin - Delete team and all their submissions
-app.post('/api/admin/delete-team', (req, res) => {
+app.post('/api/admin/delete-team', async (req, res) => {
   try {
     const { teamName } = req.body;
 
@@ -424,10 +454,10 @@ app.post('/api/admin/delete-team', (req, res) => {
     }
 
     // Delete all submissions for this team
-    db.run(`DELETE FROM submissions WHERE team_name = ?`, [teamName.trim()]);
+    await dbRun(`DELETE FROM submissions WHERE team_name = ?`, [teamName.trim()]);
     // Delete team from teams table
-    db.run(`DELETE FROM teams WHERE team_name = ?`, [teamName.trim()]);
-    saveDatabase();
+    await dbRun(`DELETE FROM teams WHERE team_name = ?`, [teamName.trim()]);
+    saveDb();
 
     res.json({ success: true, message: 'Team deleted successfully' });
   } catch (error) {
@@ -463,15 +493,15 @@ if (!isVercel) {
     app.listen(PORT, '0.0.0.0', () => {
       const localIp = getLocalIpAddress();
       console.log('\n========================================');
-      console.log('🎯 COMPETITION ROUND SERVER STARTED');
+      console.log('\uD83C\uDFAF COMPETITION ROUND SERVER STARTED');
       console.log('========================================');
-      console.log(`\n📡 Server is running on port ${PORT}`);
-      console.log(`\n🌐 Access URLs:`);
+      console.log(`\n\uD83D\uDCE1 Server is running on port ${PORT}`);
+      console.log(`\n\uD83C\uDF10 Access URLs:`);
       console.log(`   Local:    http://localhost:${PORT}`);
       console.log(`   Network:  http://${localIp}:${PORT}`);
-      console.log(`\n👥 TEAM ACCESS: Share this URL with teams:`);
+      console.log(`\n\uD83D\uDC65 TEAM ACCESS: Share this URL with teams:`);
       console.log(`   http://${localIp}:${PORT}`);
-      console.log(`\n🔐 ADMIN PANEL:`);
+      console.log(`\n\uD83D\uDD10 ADMIN PANEL:`);
       console.log(`   http://${localIp}:${PORT}/admin/admin.html`);
       console.log('\n========================================\n');
     });
