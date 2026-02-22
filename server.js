@@ -14,6 +14,15 @@ app.use(bodyParser.urlencoded({ extended: true }));
 app.use(express.static(path.join(__dirname, 'public')));
 app.use('/admin', express.static(path.join(__dirname, 'admin')));
 
+// Initialize DB eagerly
+let dbReady = null;
+
+// Ensure DB is ready before each API request (for Vercel cold starts)
+app.use('/api', async (req, res, next) => {
+  if (dbReady) await dbReady;
+  next();
+});
+
 // Serve index.html for root path
 app.get('/', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'index.html'));
@@ -21,7 +30,10 @@ app.get('/', (req, res) => {
 
 // Initialize SQLite Database
 let db;
-const dbPath = 'database.db';
+// On Vercel, use /tmp for writable storage; locally use project root
+const isVercel = process.env.VERCEL === '1';
+const dbPath = isVercel ? '/tmp/database.db' : path.join(__dirname, 'database.db');
+const bundledDbPath = path.join(__dirname, 'database.db');
 
 // Initialize database async
 async function initDatabase() {
@@ -30,6 +42,10 @@ async function initDatabase() {
   // Load existing database or create new one
   if (fs.existsSync(dbPath)) {
     const buffer = fs.readFileSync(dbPath);
+    db = new SQL.Database(buffer);
+  } else if (isVercel && fs.existsSync(bundledDbPath)) {
+    // On Vercel first run, copy bundled DB to /tmp
+    const buffer = fs.readFileSync(bundledDbPath);
     db = new SQL.Database(buffer);
   } else {
     db = new SQL.Database();
@@ -432,28 +448,38 @@ function getLocalIpAddress() {
   return 'localhost';
 }
 
-// Start server
-async function startServer() {
-  await initDatabase();
+// Initialize database
+dbReady = initDatabase().catch(err => {
+  console.error('Failed to initialize database:', err);
+});
 
-  app.listen(PORT, '0.0.0.0', () => {
-    const localIp = getLocalIpAddress();
-    console.log('\n========================================');
-    console.log('🎯 COMPETITION ROUND SERVER STARTED');
-    console.log('========================================');
-    console.log(`\n📡 Server is running on port ${PORT}`);
-    console.log(`\n🌐 Access URLs:`);
-    console.log(`   Local:    http://localhost:${PORT}`);
-    console.log(`   Network:  http://${localIp}:${PORT}`);
-    console.log(`\n👥 TEAM ACCESS: Share this URL with teams:`);
-    console.log(`   http://${localIp}:${PORT}`);
-    console.log(`\n🔐 ADMIN PANEL:`);
-    console.log(`   http://${localIp}:${PORT}/admin/admin.html`);
-    console.log('\n========================================\n');
+// Start server only when running locally (not on Vercel)
+if (!isVercel) {
+  async function startServer() {
+    await dbReady;
+
+    app.listen(PORT, '0.0.0.0', () => {
+      const localIp = getLocalIpAddress();
+      console.log('\n========================================');
+      console.log('🎯 COMPETITION ROUND SERVER STARTED');
+      console.log('========================================');
+      console.log(`\n📡 Server is running on port ${PORT}`);
+      console.log(`\n🌐 Access URLs:`);
+      console.log(`   Local:    http://localhost:${PORT}`);
+      console.log(`   Network:  http://${localIp}:${PORT}`);
+      console.log(`\n👥 TEAM ACCESS: Share this URL with teams:`);
+      console.log(`   http://${localIp}:${PORT}`);
+      console.log(`\n🔐 ADMIN PANEL:`);
+      console.log(`   http://${localIp}:${PORT}/admin/admin.html`);
+      console.log('\n========================================\n');
+    });
+  }
+
+  startServer().catch(err => {
+    console.error('Failed to start server:', err);
+    process.exit(1);
   });
 }
 
-startServer().catch(err => {
-  console.error('Failed to start server:', err);
-  process.exit(1);
-});
+// Export for Vercel serverless
+module.exports = app;
