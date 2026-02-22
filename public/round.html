@@ -1,0 +1,972 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Competition Round - Questions</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+    <!-- Fullscreen Overlay - click anywhere to enter fullscreen -->
+    <div id="fullscreenOverlay" style="
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        z-index: 99999;
+        background: rgba(10, 10, 26, 0.95);
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-direction: column;
+        font-family: 'Segoe UI', Arial, sans-serif;
+    " onclick="activateFullscreen()">
+        <div style="font-size: 4em; margin-bottom: 20px;">🖥️</div>
+        <div style="color: white; font-size: 1.5em; font-weight: bold; margin-bottom: 10px;">Click anywhere to enter
+            Full-Screen</div>
+        <div style="color: rgba(255,255,255,0.6); font-size: 1em;">The challenge will start in full-screen mode</div>
+    </div>
+
+    <script>
+        function checkOverlay() {
+            const isFS = !!(document.fullscreenElement ||
+                document.mozFullScreenElement ||
+                document.webkitFullscreenElement ||
+                document.msFullscreenElement);
+            const overlay = document.getElementById('fullscreenOverlay');
+            if (overlay) {
+                overlay.style.display = isFS ? 'none' : 'flex';
+            }
+        }
+
+        function activateFullscreen() {
+            const docElm = document.documentElement;
+            const overlay = document.getElementById('fullscreenOverlay');
+
+            if (docElm.requestFullscreen) {
+                docElm.requestFullscreen().then(() => {
+                    if (overlay) overlay.style.display = 'none';
+                }).catch(err => {
+                    console.error('Fullscreen failed:', err);
+                    if (overlay) overlay.style.display = 'none';
+                });
+            } else if (docElm.webkitRequestFullScreen) {
+                docElm.webkitRequestFullScreen();
+                if (overlay) overlay.style.display = 'none';
+            } else if (docElm.mozRequestFullScreen) {
+                docElm.mozRequestFullScreen();
+                if (overlay) overlay.style.display = 'none';
+            } else if (docElm.msRequestFullscreen) {
+                docElm.msRequestFullscreen();
+                if (overlay) overlay.style.display = 'none';
+            } else {
+                if (overlay) overlay.style.display = 'none';
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', checkOverlay);
+        document.addEventListener('fullscreenchange', checkOverlay);
+        document.addEventListener('webkitfullscreenchange', checkOverlay);
+        document.addEventListener('mozfullscreenchange', checkOverlay);
+        document.addEventListener('MSFullscreenChange', checkOverlay);
+    </script>
+
+
+
+    <div class="container">
+        <div class="round-header">
+            <div class="team-info">
+                <h2>Team: <span id="teamNameDisplay"></span></h2>
+                <p class="round-info">Round: <span id="roundNumberDisplay"></span></p>
+            </div>
+            <div class="timer-container">
+                <div class="timer" id="timer">
+                    <span id="timerDisplay">Loading...</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Round Navigation Bar -->
+        <div class="round-nav-bar" id="roundNavBar">
+            <div class="round-nav-label">Navigate Rounds:</div>
+            <div class="round-nav-buttons">
+                <button class="round-nav-btn round-nav-1" data-round="1" onclick="navigateToRound(1)">
+                    <span class="round-nav-icon">📊</span>
+                    <span class="round-nav-text">Round 1</span>
+                    <span class="round-nav-status" id="navStatus1"></span>
+                </button>
+                <span class="round-nav-separator">›</span>
+                <button class="round-nav-btn round-nav-2" data-round="2" onclick="navigateToRound(2)">
+                    <span class="round-nav-icon">💻</span>
+                    <span class="round-nav-text">Round 2</span>
+                    <span class="round-nav-status" id="navStatus2"></span>
+                </button>
+                <span class="round-nav-separator">›</span>
+                <button class="round-nav-btn round-nav-3" data-round="3" onclick="navigateToRound(3)">
+                    <span class="round-nav-icon">🧩</span>
+                    <span class="round-nav-text">Round 3</span>
+                    <span class="round-nav-status" id="navStatus3"></span>
+                </button>
+                <span class="round-nav-separator">›</span>
+                <button class="round-nav-btn round-nav-4" data-round="4" onclick="navigateToRound(4)">
+                    <span class="round-nav-icon">📐</span>
+                    <span class="round-nav-text">Round 4</span>
+                    <span class="round-nav-status" id="navStatus4"></span>
+                </button>
+            </div>
+        </div>
+
+
+        <div class="questions-container" id="questionsContainer">
+            <!-- Database Tables Reference - Only for Round 1 -->
+            <div id="databaseTablesSection" style="display: none;">
+                <div class="scenario-section">
+                    <h2>AI-Based E-Commerce Recommendation & Fraud Detection System</h2>
+                    <p class="scenario-description">
+                        A large e-commerce company similar to Amazon uses Artificial Intelligence to:
+                    </p>
+                    <ul class="scenario-list">
+                        <li>Predict customer demand levels</li>
+                        <li>Recommend product categories</li>
+                        <li>Detect fraud risk</li>
+                        <li>Analyse revenue contribution by loyalty tier</li>
+                    </ul>
+                    <p class="scenario-note">
+                        All operational and AI-generated data is stored in a relational database.
+                    </p>
+                    <div class="important-note">
+                        <strong>As a Data Analyst, you must Answer SQL queries that answer business questions.</strong>
+                    </div>
+                </div>
+
+                <div class="database-tables">
+                    <h3>📊 Table Data - Database Schema</h3>
+
+                    <div class="table-container">
+                        <h4>Customers</h4>
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th>Customer_Id</th>
+                                    <th>Name</th>
+                                    <th>City</th>
+                                    <th>Loyalty_level</th>
+                                    <th>Signup_date</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>1</td>
+                                    <td>Amit Sharma</td>
+                                    <td>Mumbai</td>
+                                    <td>Gold</td>
+                                    <td>2023-01-15</td>
+                                </tr>
+                                <tr>
+                                    <td>2</td>
+                                    <td>Priya Singh</td>
+                                    <td>Delhi</td>
+                                    <td>Silver</td>
+                                    <td>2023-03-10</td>
+                                </tr>
+                                <tr>
+                                    <td>3</td>
+                                    <td>Rahul Verma</td>
+                                    <td>Bangalore</td>
+                                    <td>Platinum</td>
+                                    <td>2022-11-05</td>
+                                </tr>
+                                <tr>
+                                    <td>4</td>
+                                    <td>Sneha Patel</td>
+                                    <td>Mumbai</td>
+                                    <td>Bronze</td>
+                                    <td>2024-02-18</td>
+                                </tr>
+                                <tr>
+                                    <td>5</td>
+                                    <td>Arjun Rao</td>
+                                    <td>Chennai</td>
+                                    <td>Gold</td>
+                                    <td>2023-07-22</td>
+                                </tr>
+                                <tr>
+                                    <td>6</td>
+                                    <td>Neha Kapoor</td>
+                                    <td>Delhi</td>
+                                    <td>Silver</td>
+                                    <td>2022-09-30</td>
+                                </tr>
+                                <tr>
+                                    <td>7</td>
+                                    <td>Vikram Mehta</td>
+                                    <td>Hyderabad</td>
+                                    <td>Platinum</td>
+                                    <td>2023-05-12</td>
+                                </tr>
+                                <tr>
+                                    <td>8</td>
+                                    <td>Kavya Iyer</td>
+                                    <td>Chennai</td>
+                                    <td>Gold</td>
+                                    <td>2024-01-08</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <div class="table-container">
+                        <h4>Orders</h4>
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th>order_id</th>
+                                    <th>customer_id</th>
+                                    <th>order_date</th>
+                                    <th>total_amount</th>
+                                    <th>payment_method</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>101</td>
+                                    <td>1</td>
+                                    <td>2024-01-10</td>
+                                    <td>15000</td>
+                                    <td>Card</td>
+                                </tr>
+                                <tr>
+                                    <td>102</td>
+                                    <td>2</td>
+                                    <td>2024-01-12</td>
+                                    <td>8000</td>
+                                    <td>UPI</td>
+                                </tr>
+                                <tr>
+                                    <td>103</td>
+                                    <td>3</td>
+                                    <td>2024-01-15</td>
+                                    <td>25000</td>
+                                    <td>NetBanking</td>
+                                </tr>
+                                <tr>
+                                    <td>104</td>
+                                    <td>1</td>
+                                    <td>2024-02-01</td>
+                                    <td>12000</td>
+                                    <td>Card</td>
+                                </tr>
+                                <tr>
+                                    <td>105</td>
+                                    <td>4</td>
+                                    <td>2024-02-10</td>
+                                    <td>4000</td>
+                                    <td>COD</td>
+                                </tr>
+                                <tr>
+                                    <td>106</td>
+                                    <td>5</td>
+                                    <td>2024-02-14</td>
+                                    <td>18000</td>
+                                    <td>UPI</td>
+                                </tr>
+                                <tr>
+                                    <td>107</td>
+                                    <td>6</td>
+                                    <td>2024-03-05</td>
+                                    <td>9500</td>
+                                    <td>Card</td>
+                                </tr>
+                                <tr>
+                                    <td>108</td>
+                                    <td>7</td>
+                                    <td>2024-03-12</td>
+                                    <td>30000</td>
+                                    <td>NetBanking</td>
+                                </tr>
+                                <tr>
+                                    <td>109</td>
+                                    <td>3</td>
+                                    <td>2024-03-20</td>
+                                    <td>22000</td>
+                                    <td>Card</td>
+                                </tr>
+                                <tr>
+                                    <td>110</td>
+                                    <td>8</td>
+                                    <td>2024-04-01</td>
+                                    <td>16000</td>
+                                    <td>UPI</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <div class="table-container">
+                        <h4>AI_Predictions</h4>
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th>prediction_id</th>
+                                    <th>customer_id</th>
+                                    <th>predicted_category</th>
+                                    <th>fraud_risk</th>
+                                    <th>demand_level</th>
+                                    <th>prediction_date</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>201</td>
+                                    <td>1</td>
+                                    <td>Electronics</td>
+                                    <td>0.2</td>
+                                    <td>High</td>
+                                    <td>2024-01-05</td>
+                                </tr>
+                                <tr>
+                                    <td>202</td>
+                                    <td>2</td>
+                                    <td>Fashion</td>
+                                    <td>0.75</td>
+                                    <td>Medium</td>
+                                    <td>2024-01-07</td>
+                                </tr>
+                                <tr>
+                                    <td>203</td>
+                                    <td>3</td>
+                                    <td>Electronics</td>
+                                    <td>0.3</td>
+                                    <td>High</td>
+                                    <td>2024-01-10</td>
+                                </tr>
+                                <tr>
+                                    <td>204</td>
+                                    <td>4</td>
+                                    <td>Grocery</td>
+                                    <td>0.85</td>
+                                    <td>Low</td>
+                                    <td>2024-02-05</td>
+                                </tr>
+                                <tr>
+                                    <td>205</td>
+                                    <td>5</td>
+                                    <td>Electronics</td>
+                                    <td>0.6</td>
+                                    <td>High</td>
+                                    <td>2024-02-07</td>
+                                </tr>
+                                <tr>
+                                    <td>206</td>
+                                    <td>6</td>
+                                    <td>Fashion</td>
+                                    <td>0.9</td>
+                                    <td>Medium</td>
+                                    <td>2024-02-15</td>
+                                </tr>
+                                <tr>
+                                    <td>207</td>
+                                    <td>7</td>
+                                    <td>Electronics</td>
+                                    <td>0.4</td>
+                                    <td>High</td>
+                                    <td>2024-03-01</td>
+                                </tr>
+                                <tr>
+                                    <td>208</td>
+                                    <td>8</td>
+                                    <td>Grocery</td>
+                                    <td>0.55</td>
+                                    <td>Medium</td>
+                                    <td>2024-03-05</td>
+                                </tr>
+                                <tr>
+                                    <td>209</td>
+                                    <td>2</td>
+                                    <td>Electronics</td>
+                                    <td>0.8</td>
+                                    <td>High</td>
+                                    <td>2024-03-10</td>
+                                </tr>
+                                <tr>
+                                    <td>210</td>
+                                    <td>6</td>
+                                    <td>Fashion</td>
+                                    <td>0.65</td>
+                                    <td>Medium</td>
+                                    <td>2024-03-18</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <div class="sql-queries-reference">
+                    <h3>📝 SQL Query Tasks</h3>
+                    <p class="queries-instruction">Write SQL queries to answer the following business questions:</p>
+                </div>
+            </div>
+
+            <!-- Algorithm & DSA Challenge Reference - Only for Round 2 -->
+            <div id="dsaChallengeSection" style="display: none;">
+                <div class="scenario-section">
+                    <h2>Algorithm & DSA Challenge</h2>
+                    <p class="scenario-description">
+                        This round tests your problem-solving abilities and understanding of algorithms:
+                    </p>
+                    <ul class="scenario-list">
+                        <li>Logic reconstruction and algorithm design</li>
+                        <li>Data structure fundamentals</li>
+                        <li>Programming language nuances</li>
+                        <li>Recursion and static variable behavior</li>
+                    </ul>
+                    <p class="scenario-note">
+                        Analyze each problem carefully and provide accurate solutions.
+                    </p>
+                    <div class="important-note">
+                        <strong>Focus on algorithmic thinking and logical reasoning.</strong>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Flowchart Analysis Reference - Only for Round 4 -->
+            <div id="flowchartSection" style="display: none;">
+                <div class="scenario-section">
+                    <h2>Flowchart Analysis Challenge</h2>
+                    <p class="scenario-description">
+                        Carefully analyze the flow of control, including all decision points, input/output operations,
+                        and processing steps depicted in the flowcharts.
+                    </p>
+                    <ul class="scenario-list">
+                        <li>Analyze the logical sequence of each flowchart</li>
+                        <li>Trace the flow of data through decision points</li>
+                        <li>Determine the output based on given inputs</li>
+                        <li>Understand loop structures and conditional logic</li>
+                    </ul>
+                    <p class="scenario-note">
+                        Based on your understanding of the operational structure represented, provide accurate responses
+                        corresponding to the given flow.
+                    </p>
+                    <div class="important-note">
+                        <strong>Ensure that your answers clearly and logically reflect the processes and decisions
+                            illustrated in the flowcharts.</strong>
+                    </div>
+                </div>
+
+                <!-- Flowchart 1 with Question -->
+                <div class="flowchart-question-block" data-question-id="15">
+                    <div class="flowchart-container">
+                        <h3>Flowchart 1:</h3>
+                        <img src="images/flowchart1.jpg" alt="Flowchart 1 - Right Triangle Pattern"
+                            class="flowchart-image">
+                    </div>
+                </div>
+
+                <!-- Flowchart 2 with Question -->
+                <div class="flowchart-question-block" data-question-id="16">
+                    <div class="flowchart-container">
+                        <h3>Flowchart 2:</h3>
+                        <img src="images/flowchart2.jpg" alt="Flowchart 2 - Armstrong Number Check"
+                            class="flowchart-image">
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Questions will be loaded here dynamically -->
+    </div>
+
+    <div class="submit-section">
+        <button id="submitBtn" class="btn-primary btn-large">Submit Answers</button>
+        <div id="submitMessage" class="submit-message"></div>
+    </div>
+
+    <!-- Next Round Navigation Panel (shown after submission) -->
+    <div class="next-round-panel" id="nextRoundPanel" style="display: none;">
+        <div class="next-round-content">
+            <h3>✅ Round Complete!</h3>
+            <p>Choose your next challenge:</p>
+            <div class="next-round-buttons">
+                <button class="next-round-btn nr-btn-1" data-round="1" onclick="navigateToRound(1)">
+                    <span class="nr-num">1</span>
+                    <span class="nr-label">Round 1</span>
+                    <span class="nr-status" id="nrStatus1"></span>
+                </button>
+                <button class="next-round-btn nr-btn-2" data-round="2" onclick="navigateToRound(2)">
+                    <span class="nr-num">2</span>
+                    <span class="nr-label">Round 2</span>
+                    <span class="nr-status" id="nrStatus2"></span>
+                </button>
+                <button class="next-round-btn nr-btn-3" data-round="3" onclick="navigateToRound(3)">
+                    <span class="nr-num">3</span>
+                    <span class="nr-label">Round 3</span>
+                    <span class="nr-status" id="nrStatus3"></span>
+                </button>
+                <button class="next-round-btn nr-btn-4" data-round="4" onclick="navigateToRound(4)">
+                    <span class="nr-num">4</span>
+                    <span class="nr-label">Round 4</span>
+                    <span class="nr-status" id="nrStatus4"></span>
+                </button>
+            </div>
+            <button class="back-to-rounds-btn" onclick="safeNavigateToRounds()">
+                🏠 Back to All Rounds
+            </button>
+        </div>
+    </div>
+    </div>
+
+    <!-- Confirmation Modal -->
+    <div id="confirmModal" class="modal">
+        <div class="modal-content">
+            <h2>⚠️ Confirm Submission</h2>
+            <p>Are you sure you want to submit your answers?</p>
+            <p class="warning-text">You will NOT be able to change your answers after submission!</p>
+            <div class="modal-buttons">
+                <button id="confirmYes" class="btn-primary">Yes, Submit</button>
+                <button id="confirmNo" class="btn-secondary">No, Go Back</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Function to navigate to a specific round
+        function navigateToRound(roundNumber) {
+            // Check if already completed
+            const teamName = sessionStorage.getItem('teamName');
+            const completedRounds = JSON.parse(localStorage.getItem(`completed_${teamName}`) || '[]');
+
+            if (completedRounds.includes(roundNumber)) {
+                alert('❌ You have already completed this challenge!\n\nPlease select a different challenge.');
+                return;
+            }
+
+            // Check if this is the current round and not submitted
+            const currentRound = sessionStorage.getItem('selectedRound');
+            if (parseInt(currentRound) === roundNumber && !isSubmitted) {
+                alert('ℹ️ You are already in this round!');
+                return;
+            }
+
+            // IMPORTANT: Disable fullscreen monitoring BEFORE navigating
+            // This prevents the "Access Denied" ban when switching rounds
+            isFullscreenEnforced = false;
+            isSubmitted = true; // Prevent beforeunload warning
+            if (fullscreenCheckInterval) {
+                clearInterval(fullscreenCheckInterval);
+                fullscreenCheckInterval = null;
+            }
+            // Remove fullscreen change event listeners
+            document.removeEventListener('fullscreenchange', handleFullscreenChange);
+            document.removeEventListener('webkitfullscreenchange', handleFullscreenChange);
+            document.removeEventListener('mozfullscreenchange', handleFullscreenChange);
+            document.removeEventListener('MSFullscreenChange', handleFullscreenChange);
+
+            // Clear any existing ban - intentional navigation should not be penalized
+            localStorage.removeItem(`banned_${teamName}`);
+            localStorage.removeItem(`${teamName}_ban_time`);
+
+            // Store selected round
+            sessionStorage.setItem('selectedRound', roundNumber);
+
+            // Simply reload the page
+            location.reload();
+        }
+
+        // Safe navigation back to rounds page without triggering ban
+        function safeNavigateToRounds() {
+            const teamName = sessionStorage.getItem('teamName');
+            // Disable fullscreen monitoring before navigating
+            isFullscreenEnforced = false;
+            isSubmitted = true; // Prevent beforeunload warning
+            if (fullscreenCheckInterval) {
+                clearInterval(fullscreenCheckInterval);
+                fullscreenCheckInterval = null;
+            }
+            document.removeEventListener('fullscreenchange', handleFullscreenChange);
+            document.removeEventListener('webkitfullscreenchange', handleFullscreenChange);
+            document.removeEventListener('mozfullscreenchange', handleFullscreenChange);
+            document.removeEventListener('MSFullscreenChange', handleFullscreenChange);
+            // Clear any existing ban
+            if (teamName) {
+                localStorage.removeItem(`banned_${teamName}`);
+                localStorage.removeItem(`${teamName}_ban_time`);
+            }
+            window.location.href = 'rounds.html';
+        }
+
+    </script>
+
+    <script src="script.js"></script>
+
+    <!-- Footer -->
+    <div class="footer">
+        <p>~:Developed by:~</p>
+        <p>Vinay S H and Pavan T M</p>
+    </div>
+
+    <style>
+        .footer {
+            text-align: center;
+            padding: 20px;
+            margin-top: 30px;
+            color: white;
+            font-size: 0.9em;
+            opacity: 0.7;
+            background-color: rgba(0, 0, 0, 0.2);
+            border-radius: 8px;
+            margin-left: 20px;
+            margin-right: 20px;
+        }
+
+        /* ===== Round Navigation Bar ===== */
+        .round-nav-bar {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            background: linear-gradient(135deg, rgba(15, 15, 40, 0.9), rgba(30, 20, 60, 0.85));
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(0, 212, 255, 0.25);
+            border-radius: 16px;
+            padding: 12px 20px;
+            margin: 0 20px 20px 20px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3), 0 0 15px rgba(0, 212, 255, 0.1);
+            overflow-x: auto;
+        }
+
+        .round-nav-label {
+            color: rgba(255, 255, 255, 0.7);
+            font-size: 0.85em;
+            font-weight: 600;
+            white-space: nowrap;
+            letter-spacing: 0.5px;
+        }
+
+        .round-nav-buttons {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .round-nav-btn {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            padding: 8px 16px;
+            border: 2px solid rgba(255, 255, 255, 0.15);
+            border-radius: 25px;
+            background: rgba(255, 255, 255, 0.05);
+            color: white;
+            font-size: 0.85em;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+            position: relative;
+            overflow: hidden;
+            white-space: nowrap;
+        }
+
+        .round-nav-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+            transition: left 0.4s ease;
+        }
+
+        .round-nav-btn:hover::before {
+            left: 100%;
+        }
+
+        .round-nav-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+        }
+
+        .round-nav-1 {
+            border-color: rgba(0, 212, 255, 0.4);
+        }
+
+        .round-nav-1:hover {
+            background: rgba(0, 212, 255, 0.2);
+            box-shadow: 0 4px 15px rgba(0, 212, 255, 0.3);
+        }
+
+        .round-nav-2 {
+            border-color: rgba(131, 56, 236, 0.4);
+        }
+
+        .round-nav-2:hover {
+            background: rgba(131, 56, 236, 0.2);
+            box-shadow: 0 4px 15px rgba(131, 56, 236, 0.3);
+        }
+
+        .round-nav-3 {
+            border-color: rgba(255, 0, 110, 0.4);
+        }
+
+        .round-nav-3:hover {
+            background: rgba(255, 0, 110, 0.2);
+            box-shadow: 0 4px 15px rgba(255, 0, 110, 0.3);
+        }
+
+        .round-nav-4 {
+            border-color: rgba(255, 159, 28, 0.4);
+        }
+
+        .round-nav-4:hover {
+            background: rgba(255, 159, 28, 0.2);
+            box-shadow: 0 4px 15px rgba(255, 159, 28, 0.3);
+        }
+
+        .round-nav-btn.active {
+            pointer-events: none;
+        }
+
+        .round-nav-1.active {
+            background: linear-gradient(135deg, rgba(0, 212, 255, 0.4), rgba(0, 150, 200, 0.3));
+            border-color: #00d4ff;
+            box-shadow: 0 0 15px rgba(0, 212, 255, 0.4);
+        }
+
+        .round-nav-2.active {
+            background: linear-gradient(135deg, rgba(131, 56, 236, 0.4), rgba(100, 40, 200, 0.3));
+            border-color: #8338ec;
+            box-shadow: 0 0 15px rgba(131, 56, 236, 0.4);
+        }
+
+        .round-nav-3.active {
+            background: linear-gradient(135deg, rgba(255, 0, 110, 0.4), rgba(200, 0, 80, 0.3));
+            border-color: #ff006e;
+            box-shadow: 0 0 15px rgba(255, 0, 110, 0.4);
+        }
+
+        .round-nav-4.active {
+            background: linear-gradient(135deg, rgba(255, 159, 28, 0.4), rgba(200, 120, 20, 0.3));
+            border-color: #ff9f1c;
+            box-shadow: 0 0 15px rgba(255, 159, 28, 0.4);
+        }
+
+        .round-nav-btn.completed {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .round-nav-btn.completed .round-nav-status::after {
+            content: ' ✓';
+            color: #4ade80;
+        }
+
+        .round-nav-separator {
+            color: rgba(255, 255, 255, 0.25);
+            font-size: 1.2em;
+            font-weight: 300;
+        }
+
+        .round-nav-icon {
+            font-size: 1em;
+        }
+
+        .round-nav-text {
+            font-weight: 600;
+        }
+
+        .round-nav-status {
+            font-size: 0.75em;
+            color: rgba(255, 255, 255, 0.5);
+        }
+
+        /* ===== Next Round Panel (after submission) ===== */
+        .next-round-panel {
+            margin: 30px 20px;
+            padding: 30px;
+            background: linear-gradient(135deg, rgba(15, 15, 40, 0.95), rgba(30, 20, 60, 0.9));
+            backdrop-filter: blur(15px);
+            -webkit-backdrop-filter: blur(15px);
+            border: 2px solid rgba(74, 222, 128, 0.3);
+            border-radius: 20px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3), 0 0 20px rgba(74, 222, 128, 0.1);
+            text-align: center;
+            animation: panelSlideIn 0.5s ease-out;
+        }
+
+        @keyframes panelSlideIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .next-round-content h3 {
+            color: #4ade80;
+            font-size: 1.6em;
+            margin-bottom: 8px;
+            letter-spacing: 1px;
+        }
+
+        .next-round-content p {
+            color: rgba(255, 255, 255, 0.7);
+            font-size: 1em;
+            margin-bottom: 20px;
+        }
+
+        .next-round-buttons {
+            display: flex;
+            gap: 12px;
+            justify-content: center;
+            flex-wrap: wrap;
+            margin-bottom: 20px;
+        }
+
+        .next-round-btn {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 4px;
+            padding: 15px 25px;
+            border-radius: 16px;
+            border: 2px solid rgba(255, 255, 255, 0.15);
+            background: rgba(255, 255, 255, 0.05);
+            color: white;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            min-width: 100px;
+        }
+
+        .next-round-btn:hover {
+            transform: translateY(-4px) scale(1.05);
+        }
+
+        .nr-btn-1 {
+            border-color: rgba(0, 212, 255, 0.4);
+        }
+
+        .nr-btn-1:hover {
+            background: rgba(0, 212, 255, 0.2);
+            box-shadow: 0 8px 25px rgba(0, 212, 255, 0.3);
+        }
+
+        .nr-btn-2 {
+            border-color: rgba(131, 56, 236, 0.4);
+        }
+
+        .nr-btn-2:hover {
+            background: rgba(131, 56, 236, 0.2);
+            box-shadow: 0 8px 25px rgba(131, 56, 236, 0.3);
+        }
+
+        .nr-btn-3 {
+            border-color: rgba(255, 0, 110, 0.4);
+        }
+
+        .nr-btn-3:hover {
+            background: rgba(255, 0, 110, 0.2);
+            box-shadow: 0 8px 25px rgba(255, 0, 110, 0.3);
+        }
+
+        .nr-btn-4 {
+            border-color: rgba(255, 159, 28, 0.4);
+        }
+
+        .nr-btn-4:hover {
+            background: rgba(255, 159, 28, 0.2);
+            box-shadow: 0 8px 25px rgba(255, 159, 28, 0.3);
+        }
+
+        .next-round-btn.completed {
+            opacity: 0.35;
+            cursor: not-allowed;
+            pointer-events: none;
+        }
+
+        .next-round-btn.current {
+            opacity: 0.35;
+            cursor: not-allowed;
+            pointer-events: none;
+        }
+
+        .nr-num {
+            font-size: 1.5em;
+            font-weight: 800;
+        }
+
+        .nr-label {
+            font-size: 0.8em;
+            font-weight: 500;
+            letter-spacing: 0.5px;
+        }
+
+        .nr-status {
+            font-size: 0.7em;
+            color: rgba(255, 255, 255, 0.5);
+        }
+
+        .back-to-rounds-btn {
+            padding: 12px 28px;
+            background: linear-gradient(135deg, rgba(0, 212, 255, 0.2), rgba(131, 56, 236, 0.2));
+            border: 1px solid rgba(0, 212, 255, 0.3);
+            border-radius: 30px;
+            color: white;
+            font-size: 0.95em;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            letter-spacing: 0.5px;
+        }
+
+        .back-to-rounds-btn:hover {
+            background: linear-gradient(135deg, rgba(0, 212, 255, 0.35), rgba(131, 56, 236, 0.35));
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(0, 212, 255, 0.2);
+        }
+
+        @media (max-width: 768px) {
+            .round-nav-bar {
+                flex-direction: column;
+                gap: 8px;
+                padding: 10px 12px;
+            }
+
+            .round-nav-buttons {
+                justify-content: center;
+            }
+
+            .round-nav-btn {
+                padding: 6px 12px;
+                font-size: 0.8em;
+            }
+
+            .round-nav-separator {
+                display: none;
+            }
+
+            .next-round-buttons {
+                gap: 8px;
+            }
+
+            .next-round-btn {
+                padding: 10px 18px;
+                min-width: 80px;
+            }
+        }
+    </style>
+
+</body>
+
+</html>

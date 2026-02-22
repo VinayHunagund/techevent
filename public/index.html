@@ -1,0 +1,491 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tech Triviathon - Welcome</title>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Rajdhani:wght@400;500;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Rajdhani', sans-serif;
+            min-height: 100vh;
+            background: #0a0a1a;
+            overflow-x: hidden;
+            position: relative;
+        }
+
+        /* Animated Starfield Background */
+        .stars {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .star {
+            position: absolute;
+            width: 2px;
+            height: 2px;
+            background: white;
+            border-radius: 50%;
+            animation: twinkle 3s infinite ease-in-out;
+        }
+
+        @keyframes twinkle {
+            0%, 100% { opacity: 0.3; transform: scale(1); }
+            50% { opacity: 1; transform: scale(1.2); }
+        }
+
+        /* Gradient Glow Effects */
+        .glow-bg {
+            position: fixed;
+            width: 600px;
+            height: 600px;
+            border-radius: 50%;
+            filter: blur(150px);
+            opacity: 0.4;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .glow-1 {
+            top: -200px;
+            left: -200px;
+            background: linear-gradient(135deg, #00d4ff, #7b2cbf);
+            animation: float 8s infinite ease-in-out;
+        }
+
+        .glow-2 {
+            bottom: -200px;
+            right: -200px;
+            background: linear-gradient(135deg, #ff006e, #8338ec);
+            animation: float 8s infinite ease-in-out reverse;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translate(0, 0) scale(1); }
+            50% { transform: translate(30px, -30px) scale(1.1); }
+        }
+
+        /* Main Container */
+        .container {
+            position: relative;
+            z-index: 1;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        /* Header Section */
+        .header {
+            text-align: center;
+            margin-bottom: 50px;
+        }
+
+        .tech-text {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 3.5rem;
+            font-weight: 900;
+            color: #00d4ff;
+            text-shadow: 
+                0 0 10px #00d4ff,
+                0 0 20px #00d4ff,
+                0 0 40px #00d4ff,
+                0 0 80px #00d4ff;
+            letter-spacing: 15px;
+            animation: neonPulse 2s infinite alternate;
+        }
+
+        @keyframes neonPulse {
+            from { 
+                text-shadow: 
+                    0 0 10px #00d4ff,
+                    0 0 20px #00d4ff,
+                    0 0 40px #00d4ff;
+            }
+            to { 
+                text-shadow: 
+                    0 0 20px #00d4ff,
+                    0 0 40px #00d4ff,
+                    0 0 60px #00d4ff,
+                    0 0 100px #00d4ff;
+            }
+        }
+
+        .triviathon-text {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 5rem;
+            font-weight: 900;
+            background: linear-gradient(135deg, #ff006e, #ff4d9e, #8338ec, #7b2cbf);
+            background-size: 300% 300%;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            letter-spacing: 8px;
+            animation: gradientShift 4s infinite ease-in-out;
+            margin-top: -10px;
+        }
+
+        @keyframes gradientShift {
+            0%, 100% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+        }
+
+        .subtitle {
+            font-size: 1.3rem;
+            color: #e0e0e0;
+            margin-top: 20px;
+            letter-spacing: 3px;
+            font-weight: 500;
+        }
+
+        /* Glassmorphism Card */
+        .glass-card {
+            background: rgba(255, 255, 255, 0.03);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border-radius: 30px;
+            border: 2px solid rgba(0, 212, 255, 0.3);
+            box-shadow: 
+                0 0 30px rgba(0, 212, 255, 0.2),
+                inset 0 0 30px rgba(0, 212, 255, 0.05);
+            padding: 50px 60px;
+            max-width: 500px;
+            width: 100%;
+            text-align: center;
+            animation: cardGlow 3s infinite alternate;
+        }
+
+        @keyframes cardGlow {
+            from { 
+                box-shadow: 
+                    0 0 30px rgba(0, 212, 255, 0.2),
+                    inset 0 0 30px rgba(0, 212, 255, 0.05);
+            }
+            to { 
+                box-shadow: 
+                    0 0 50px rgba(0, 212, 255, 0.4),
+                    inset 0 0 40px rgba(0, 212, 255, 0.1);
+            }
+        }
+
+        .card-heading {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 1.5rem;
+            color: #ffffff;
+            margin-bottom: 30px;
+            letter-spacing: 2px;
+        }
+
+        /* Input Field */
+        .input-group {
+            margin-bottom: 30px;
+        }
+
+        .neon-input {
+            width: 100%;
+            padding: 18px 25px;
+            font-size: 1.1rem;
+            font-family: 'Rajdhani', sans-serif;
+            background: rgba(0, 0, 0, 0.4);
+            border: 2px solid rgba(0, 212, 255, 0.5);
+            border-radius: 15px;
+            color: #ffffff;
+            outline: none;
+            transition: all 0.3s ease;
+            letter-spacing: 1px;
+        }
+
+        .neon-input::placeholder {
+            color: rgba(255, 255, 255, 0.4);
+        }
+
+        .neon-input:focus {
+            border-color: #00d4ff;
+            box-shadow: 
+                0 0 20px rgba(0, 212, 255, 0.5),
+                inset 0 0 20px rgba(0, 212, 255, 0.1);
+        }
+
+        /* Gradient Button */
+        .gradient-btn {
+            width: 100%;
+            padding: 20px 40px;
+            font-family: 'Orbitron', sans-serif;
+            font-size: 1.2rem;
+            font-weight: 700;
+            letter-spacing: 3px;
+            text-transform: uppercase;
+            background: linear-gradient(135deg, #00d4ff, #ff006e);
+            background-size: 200% 200%;
+            border: none;
+            border-radius: 15px;
+            color: #ffffff;
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+            transition: all 0.3s ease;
+            box-shadow: 0 0 30px rgba(0, 212, 255, 0.3);
+        }
+
+        .gradient-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 
+                0 10px 40px rgba(0, 212, 255, 0.5),
+                0 0 60px rgba(255, 0, 110, 0.3);
+            background-position: 100% 0;
+        }
+
+        .gradient-btn:active {
+            transform: translateY(-1px);
+        }
+
+        .gradient-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(
+                90deg,
+                transparent,
+                rgba(255, 255, 255, 0.3),
+                transparent
+            );
+            transition: left 0.5s ease;
+        }
+
+        .gradient-btn:hover::before {
+            left: 100%;
+        }
+
+        /* Error Message */
+        .error-message {
+            color: #ff4d4d;
+            font-size: 0.95rem;
+            margin-bottom: 20px;
+            text-shadow: 0 0 10px rgba(255, 77, 77, 0.5);
+            display: none;
+        }
+
+        /* Footer */
+        .footer {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            text-align: center;
+            color: rgba(255, 255, 255, 0.5);
+            font-size: 0.85rem;
+            letter-spacing: 1px;
+            z-index: 1;
+        }
+
+        .footer p {
+            margin: 3px 0;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .tech-text {
+                font-size: 2.5rem;
+                letter-spacing: 8px;
+            }
+            
+            .triviathon-text {
+                font-size: 3rem;
+                letter-spacing: 4px;
+            }
+            
+            .subtitle {
+                font-size: 1rem;
+            }
+            
+            .glass-card {
+                padding: 35px 30px;
+                margin: 0 15px;
+            }
+            
+            .card-heading {
+                font-size: 1.2rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Animated Stars Background -->
+    <div class="stars" id="stars"></div>
+    
+    <!-- Gradient Glow Effects -->
+    <div class="glow-bg glow-1"></div>
+    <div class="glow-bg glow-2"></div>
+
+    <div class="container">
+        <!-- Header Section -->
+        <div class="header">
+            <div class="tech-text">TECH</div>
+            <div class="triviathon-text">TRIVIATHON</div>
+            <div class="subtitle">Master the Ultimate Tech Challenge</div>
+        </div>
+
+        <!-- Glassmorphism Card -->
+        <div class="glass-card">
+            <h2 class="card-heading">Enter Your Team Name</h2>
+            
+            <form id="startForm">
+                <div class="input-group">
+                    <input 
+                        type="text" 
+                        id="teamName" 
+                        name="teamName" 
+                        class="neon-input"
+                        placeholder="Type your team name here..." 
+                        required 
+                        autocomplete="off"
+                        maxlength="50">
+                </div>
+                
+                <div id="errorMessage" class="error-message"></div>
+                
+                <button type="submit" class="gradient-btn">START CHALLENGE</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <div class="footer">
+        <p>~:Developed by:~</p>
+        <p>Vinay S H and Pavan T M</p>
+    </div>
+
+    <script>
+        // Generate animated stars
+        function createStars() {
+            const starsContainer = document.getElementById('stars');
+            const starCount = 150;
+            
+            for (let i = 0; i < starCount; i++) {
+                const star = document.createElement('div');
+                star.className = 'star';
+                star.style.left = Math.random() * 100 + '%';
+                star.style.top = Math.random() * 100 + '%';
+                star.style.animationDelay = Math.random() * 3 + 's';
+                star.style.animationDuration = (Math.random() * 3 + 2) + 's';
+                
+                // Random star sizes
+                const size = Math.random() * 2 + 1;
+                star.style.width = size + 'px';
+                star.style.height = size + 'px';
+                
+                starsContainer.appendChild(star);
+            }
+        }
+        
+        createStars();
+
+        // Check if team is banned on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            const teamName = sessionStorage.getItem('teamName');
+            if (teamName) {
+                const bannedKey = `banned_${teamName}`;
+                if (localStorage.getItem(bannedKey) === 'true') {
+                    showBanMessage();
+                    return;
+                }
+            }
+        });
+        
+        // Handle form submission
+        document.getElementById('startForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const teamName = document.getElementById('teamName').value.trim();
+            const errorDiv = document.getElementById('errorMessage');
+            
+            // Validation
+            if (!teamName) {
+                errorDiv.textContent = 'Please enter your team name';
+                errorDiv.style.display = 'block';
+                return;
+            }
+
+            if (teamName.length < 3) {
+                errorDiv.textContent = 'Team name must be at least 3 characters';
+                errorDiv.style.display = 'block';
+                return;
+            }
+            
+            // Check if team is banned
+            const bannedKey = `banned_${teamName}`;
+            if (localStorage.getItem(bannedKey) === 'true') {
+                errorDiv.textContent = 'This team has been disqualified for violating competition rules.';
+                errorDiv.style.display = 'block';
+                return;
+            }
+
+            // Register team on server
+            fetch('/api/register-team', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ teamName: teamName })
+            }).then(response => response.json())
+              .then(data => {
+                  // Store team name in session storage
+                  sessionStorage.setItem('teamName', teamName);
+                  
+                  // Redirect to rounds selection page
+                  window.location.href = 'rounds.html';
+              })
+              .catch(error => {
+                  console.error('Error registering team:', error);
+                  // Still proceed even if registration fails
+                  sessionStorage.setItem('teamName', teamName);
+                  window.location.href = 'rounds.html';
+              });
+        });
+        
+        // Show ban message
+        function showBanMessage() {
+            document.body.innerHTML = `
+                <div style="
+                    display: flex;
+                    flex-direction: column;
+                    align-items: center;
+                    justify-content: center;
+                    height: 100vh;
+                    background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+                    color: white;
+                    font-family: Arial, sans-serif;
+                    text-align: center;
+                    padding: 20px;
+                ">
+                    <h1 style="color: #ff4444; font-size: 3em; margin-bottom: 20px;">⛔ ACCESS DENIED</h1>
+                    <p style="font-size: 1.5em; margin-bottom: 20px;">Your team has been disqualified.</p>
+                    <p style="font-size: 1.2em; color: #ff8888;">Reason: Exited full-screen mode during the competition.</p>
+                    <p style="font-size: 1em; margin-top: 30px; color: #888;">Contact the administrator if you believe this is an error.</p>
+                </div>
+            `;
+        }
+
+        // Clear error message on input
+        document.getElementById('teamName').addEventListener('input', function() {
+            document.getElementById('errorMessage').style.display = 'none';
+        });
+    </script>
+</body>
+</html>

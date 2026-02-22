@@ -1,0 +1,94 @@
+# Armstrong Number Check - Flowchart Visualization
+
+Below is a textual representation of what the Armstrong Number Check flowchart looks like:
+
+```
+                    +-------------+
+                    |   START     |
+                    +------+------+
+                           |
+                           v
+                    +-------------+
+                    | INPUT n     |
+                    +------+------+
+                           |
+                           v
+         +---------------+-------+-------------+
+         |                       |             |
+         v                       v             v
+    +--------+              +---------+   +----------+
+    |SET sum |              |SET temp |   |COUNT     |
+    |to 0    |              |to n     |   |DIGITS    |
+    +--------+              +---------+   +----------+
+         |                       |             |
+         +-----------------------+-------------+
+                           |
+                           v
+                    +-------------+
+               +--->|temp > 0 ?   |<---+
+               |    +-------------+    |
+               |         |YES           |
+               |         v              |
+               |    +-------------+     |
+               |    |GET digit =  |     |
+               |    |temp MOD 10  |     |
+               |    +-------------+     |
+               |         |              |
+               |         v              |
+               |    +-------------+     |
+               |    |CALCULATE    |     |
+               |    |digit^digits |     |
+               |    +-------------+     |
+               |         |              |
+               |         v              |
+               |    +-------------+     |
+               |    |ADD to sum   |     |
+               |    +-------------+     |
+               |         |              |
+               |         v              |
+               |    +-------------+     |
+               |    |REMOVE last  |     |
+               |    |digit from   |     |
+               |    |temp (temp/10)|    |
+               |    +-------------+     |
+               |         |              |
+               +---------+--------------+
+                         |
+                         v
+                    +-------------+
+                    |sum == n ?   |
+                    +-------------+
+                         |YES
+                         v
+                    +-------------+
+                    |ARMSTRONG    |
+                    |NUMBER       |
+                    +-------------+
+                         |
+                         v
+                    +-------------+
+                    |   END       |
+                    +-------------+
+
+```
+
+## Flowchart Symbols Used:
+
+- **Oval**: Start/End points
+- **Parallelogram**: Input/Output operations
+- **Rectangle**: Process/Assignment operations
+- **Diamond**: Decision points
+- **Arrows**: Flow of control
+
+## Key Points:
+
+1. The algorithm takes an input number 'n'
+2. It initializes a temporary variable 'temp' with the value of 'n'
+3. It calculates the number of digits in the input number
+4. It iterates through each digit of the number:
+   - Extracts the last digit using modulo operation
+   - Raises the digit to the power of total number of digits
+   - Adds the result to a running sum
+   - Removes the last digit from the temporary variable
+5. Finally compares the calculated sum with the original number
+6. If they are equal, the number is an Armstrong number

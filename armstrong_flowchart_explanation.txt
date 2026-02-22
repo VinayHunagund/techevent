@@ -1,0 +1,64 @@
+# Armstrong Number Check Algorithm and Flowchart Explanation
+
+## What is an Armstrong Number?
+
+An Armstrong number (also known as a narcissistic number) is a number that is equal to the sum of its own digits each raised to the power of the number of digits.
+
+For example:
+- 153 = 1³ + 5³ + 3³ = 1 + 125 + 27 = 153 (3-digit Armstrong number)
+- 9474 = 9⁴ + 4⁴ + 7⁴ + 4⁴ = 6561 + 256 + 2401 + 256 = 9474 (4-digit Armstrong number)
+- 371 = 3³ + 7³ + 1³ = 27 + 343 + 1 = 371 (3-digit Armstrong number)
+
+## Algorithm Steps for Armstrong Number Check
+
+1. START
+2. INPUT a number (n)
+3. SET temp = n
+4. SET sum = 0
+5. COUNT the number of digits in n (let's call it digits)
+6. WHILE temp > 0
+   - GET the last digit of temp (digit = temp % 10)
+   - ADD digit^digits to sum (sum = sum + digit^digits)
+   - REMOVE the last digit from temp (temp = temp / 10)
+7. IF sum == n
+   - OUTPUT "Number is an Armstrong number"
+8. ELSE
+   - OUTPUT "Number is not an Armstrong number"
+9. STOP
+
+## Flowchart Description
+
+The typical flowchart for an Armstrong number check would include:
+
+1. **Start** - Oval symbol indicating the beginning
+2. **Input** - Parallelogram to input the number
+3. **Initialization** - Rectangle to initialize temp = n and sum = 0
+4. **Count Digits** - Rectangle to calculate the number of digits in the input number
+5. **Decision Box** - Diamond shape to check if temp > 0
+6. **Processing Loop** - Series of rectangles for:
+   - Extracting the last digit (temp % 10)
+   - Calculating digit raised to the power of total digits
+   - Adding to sum
+   - Removing last digit from temp (temp / 10)
+7. **Comparison** - Decision diamond comparing sum with original number
+8. **Output** - Parallelograms for displaying results
+9. **End** - Oval symbol indicating the end
+
+## Example Trace for n = 153
+
+- Initial: n = 153, temp = 153, sum = 0, digits = 3
+- Iteration 1: digit = 3, sum = 0 + 3³ = 27, temp = 15
+- Iteration 2: digit = 5, sum = 27 + 5³ = 27 + 125 = 152, temp = 1
+- Iteration 3: digit = 1, sum = 152 + 1³ = 152 + 1 = 153, temp = 0
+- Final: sum (153) == n (153) → Armstrong number!
+
+## Alternative Simpler Version (for 3-digit numbers specifically)
+
+For 3-digit Armstrong numbers specifically, the algorithm is simplified:
+- Take each digit of the 3-digit number
+- Cube each digit
+- Sum the cubes
+- Compare with original number
+
+Example: 153
+- 1³ + 5³ + 3³ = 1 + 125 + 27 = 153 ✓

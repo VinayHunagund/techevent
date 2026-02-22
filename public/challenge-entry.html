@@ -1,0 +1,535 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Flow2Data Challenge - Get Ready</title>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Poppins:wght@300;400;500;600&display=swap"
+        rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            min-height: 100vh;
+            background: #0a0a1a;
+            overflow-x: hidden;
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* Animated Starfield Background */
+        .stars {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .star {
+            position: absolute;
+            width: 2px;
+            height: 2px;
+            background: white;
+            border-radius: 50%;
+            animation: twinkle 3s infinite ease-in-out;
+        }
+
+        @keyframes twinkle {
+
+            0%,
+            100% {
+                opacity: 0.3;
+                transform: scale(1);
+            }
+
+            50% {
+                opacity: 1;
+                transform: scale(1.2);
+            }
+        }
+
+        /* Gradient Glow Effects */
+        .glow-bg {
+            position: fixed;
+            width: 700px;
+            height: 700px;
+            border-radius: 50%;
+            filter: blur(180px);
+            opacity: 0.35;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .glow-1 {
+            top: -250px;
+            left: -200px;
+            background: linear-gradient(135deg, #00d4ff, #7b2cbf);
+            animation: float 10s infinite ease-in-out;
+        }
+
+        .glow-2 {
+            bottom: -250px;
+            right: -200px;
+            background: linear-gradient(135deg, #ff006e, #8338ec);
+            animation: float 10s infinite ease-in-out reverse;
+        }
+
+        @keyframes float {
+
+            0%,
+            100% {
+                transform: translate(0, 0) scale(1);
+            }
+
+            50% {
+                transform: translate(40px, -40px) scale(1.1);
+            }
+        }
+
+        /* Main Container */
+        .entry-container {
+            position: relative;
+            z-index: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 40px 20px;
+            max-width: 700px;
+            width: 100%;
+        }
+
+        /* Entry Card */
+        .entry-card {
+            background: rgba(255, 255, 255, 0.03);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border-radius: 30px;
+            padding: 50px 40px;
+            text-align: center;
+            width: 100%;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 0 60px rgba(0, 0, 0, 0.4);
+            animation: cardEntrance 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        @keyframes cardEntrance {
+            from {
+                opacity: 0;
+                transform: translateY(40px) scale(0.95);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+        }
+
+        /* Challenge Number Ring */
+        .challenge-ring {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            border: 4px solid var(--accent-color, #00d4ff);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 25px;
+            box-shadow: 0 0 30px var(--glow, rgba(0, 212, 255, 0.3));
+            animation: ringPulse 2s infinite ease-in-out;
+        }
+
+        @keyframes ringPulse {
+
+            0%,
+            100% {
+                box-shadow: 0 0 30px var(--glow, rgba(0, 212, 255, 0.3));
+            }
+
+            50% {
+                box-shadow: 0 0 50px var(--glow, rgba(0, 212, 255, 0.5));
+            }
+        }
+
+        .challenge-ring .number {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 3rem;
+            font-weight: 900;
+            color: var(--accent-color, #00d4ff);
+        }
+
+        /* Title */
+        .entry-title {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 2rem;
+            font-weight: 700;
+            color: #ffffff;
+            letter-spacing: 3px;
+            margin-bottom: 10px;
+        }
+
+        .entry-subtitle {
+            font-size: 1.1rem;
+            color: rgba(255, 255, 255, 0.6);
+            margin-bottom: 30px;
+            letter-spacing: 1px;
+        }
+
+        /* Team Badge */
+        .team-badge {
+            background: rgba(0, 212, 255, 0.1);
+            border: 1px solid rgba(0, 212, 255, 0.3);
+            border-radius: 50px;
+            padding: 10px 25px;
+            margin-bottom: 35px;
+            display: inline-block;
+        }
+
+        .team-badge span {
+            color: rgba(255, 255, 255, 0.7);
+            font-size: 0.95rem;
+            letter-spacing: 2px;
+        }
+
+        .team-badge strong {
+            color: #ff006e;
+            font-weight: 600;
+        }
+
+        /* Rules Section */
+        .rules-section {
+            background: rgba(255, 255, 255, 0.04);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 16px;
+            padding: 25px 30px;
+            margin-bottom: 40px;
+            text-align: left;
+        }
+
+        .rules-title {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 0.9rem;
+            color: rgba(255, 255, 255, 0.5);
+            letter-spacing: 3px;
+            margin-bottom: 15px;
+            text-align: center;
+        }
+
+        .rules-list {
+            list-style: none;
+            padding: 0;
+        }
+
+        .rules-list li {
+            color: rgba(255, 255, 255, 0.7);
+            font-size: 0.95rem;
+            padding: 8px 0;
+            padding-left: 28px;
+            position: relative;
+            line-height: 1.5;
+        }
+
+        .rules-list li::before {
+            content: '⚡';
+            position: absolute;
+            left: 0;
+            top: 8px;
+        }
+
+        /* Fullscreen Button */
+        .fullscreen-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 12px;
+            padding: 18px 50px;
+            font-family: 'Orbitron', sans-serif;
+            font-size: 1.1rem;
+            font-weight: 700;
+            letter-spacing: 2px;
+            color: white;
+            border: none;
+            border-radius: 50px;
+            cursor: pointer;
+            background: linear-gradient(135deg, var(--accent-color, #00d4ff), var(--accent-end, #8338ec));
+            box-shadow:
+                0 8px 30px rgba(0, 0, 0, 0.3),
+                0 0 40px var(--glow, rgba(0, 212, 255, 0.2));
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .fullscreen-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.15), transparent);
+            transition: left 0.5s ease;
+        }
+
+        .fullscreen-btn:hover::before {
+            left: 100%;
+        }
+
+        .fullscreen-btn:hover {
+            transform: translateY(-4px) scale(1.03);
+            box-shadow:
+                0 12px 40px rgba(0, 0, 0, 0.4),
+                0 0 60px var(--glow, rgba(0, 212, 255, 0.35));
+        }
+
+        .fullscreen-btn:active {
+            transform: translateY(-2px) scale(1.01);
+        }
+
+        .fullscreen-btn .btn-icon {
+            font-size: 1.4rem;
+        }
+
+        /* Back Link */
+        .back-link {
+            display: inline-block;
+            margin-top: 25px;
+            color: rgba(255, 255, 255, 0.4);
+            font-size: 0.9rem;
+            text-decoration: none;
+            letter-spacing: 1px;
+            transition: color 0.3s;
+        }
+
+        .back-link:hover {
+            color: rgba(255, 255, 255, 0.7);
+        }
+
+        /* Footer */
+        .footer {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            padding: 15px;
+            text-align: center;
+            color: rgba(255, 255, 255, 0.3);
+            font-size: 0.8rem;
+            letter-spacing: 1px;
+            z-index: 1;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .entry-card {
+                padding: 35px 25px;
+                border-radius: 20px;
+            }
+
+            .entry-title {
+                font-size: 1.5rem;
+                letter-spacing: 2px;
+            }
+
+            .fullscreen-btn {
+                padding: 15px 35px;
+                font-size: 0.9rem;
+            }
+
+            .challenge-ring {
+                width: 100px;
+                height: 100px;
+            }
+
+            .challenge-ring .number {
+                font-size: 2.5rem;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Animated Stars Background -->
+    <div class="stars" id="stars"></div>
+
+    <!-- Gradient Glow Effects -->
+    <div class="glow-bg glow-1"></div>
+    <div class="glow-bg glow-2"></div>
+
+    <div class="entry-container">
+        <div class="entry-card" id="entryCard">
+            <!-- Challenge Ring -->
+            <div class="challenge-ring" id="challengeRing">
+                <span class="number" id="challengeNumber">-</span>
+            </div>
+
+            <h1 class="entry-title" id="entryTitle">Challenge <span id="challengeLabel">-</span></h1>
+            <p class="entry-subtitle">Get ready to begin your challenge</p>
+
+            <!-- Team Badge -->
+            <div class="team-badge">
+                <span>TEAM: <strong id="teamNameDisplay">-</strong></span>
+            </div>
+
+            <!-- Rules -->
+            <div class="rules-section">
+                <p class="rules-title">BEFORE YOU BEGIN</p>
+                <ul class="rules-list">
+                    <li>The challenge will start in <strong>full-screen mode</strong></li>
+                    <li>Do <strong>not</strong> exit full-screen during the challenge — doing so will disqualify your
+                        team</li>
+                    <li>The timer will begin once the challenge loads</li>
+                    <li>Make sure you are ready before clicking the button below</li>
+                </ul>
+            </div>
+
+            <!-- Fullscreen Button -->
+            <button class="fullscreen-btn" id="startChallengeBtn" onclick="startChallenge()">
+                <span class="btn-icon">🖥️</span>
+                ENTER FULL SCREEN & START
+            </button>
+
+            <br>
+            <a href="rounds.html" class="back-link">← Back to Challenges</a>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <div class="footer">
+        <p>~:Developed by:~ Vinay S H and Pavan T M</p>
+    </div>
+
+    <script>
+        // Generate animated stars
+        function createStars() {
+            const starsContainer = document.getElementById('stars');
+            const starCount = 150;
+            for (let i = 0; i < starCount; i++) {
+                const star = document.createElement('div');
+                star.className = 'star';
+                star.style.left = Math.random() * 100 + '%';
+                star.style.top = Math.random() * 100 + '%';
+                star.style.animationDelay = Math.random() * 3 + 's';
+                star.style.animationDuration = (Math.random() * 3 + 2) + 's';
+                const size = Math.random() * 2 + 1;
+                star.style.width = size + 'px';
+                star.style.height = size + 'px';
+                starsContainer.appendChild(star);
+            }
+        }
+        createStars();
+
+        // Check if team name exists
+        const teamName = sessionStorage.getItem('teamName');
+        if (!teamName) {
+            window.location.href = 'index.html';
+        }
+
+        // Check if round is selected
+        const selectedRound = sessionStorage.getItem('selectedRound');
+        if (!selectedRound) {
+            window.location.href = 'rounds.html';
+        }
+
+        // Check if team is banned
+        const bannedKey = `banned_${teamName}`;
+        if (localStorage.getItem(bannedKey) === 'true') {
+            document.body.innerHTML = `
+                <div style="
+                    display: flex; flex-direction: column; align-items: center; justify-content: center;
+                    height: 100vh; background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+                    color: white; font-family: Arial, sans-serif; text-align: center; padding: 20px;
+                ">
+                    <h1 style="color: #ff4444; font-size: 3em; margin-bottom: 20px;">⛔ ACCESS DENIED</h1>
+                    <p style="font-size: 1.5em; margin-bottom: 20px;">Your team has been disqualified.</p>
+                    <p style="font-size: 1.2em; color: #ff8888;">Reason: Exited full-screen mode during the competition.</p>
+                    <p style="font-size: 1em; margin-top: 30px; color: #888;">Contact the administrator if you believe this is an error.</p>
+                </div>
+            `;
+        }
+
+        // Check if already completed
+        const completedRounds = JSON.parse(localStorage.getItem(`completed_${teamName}`) || '[]');
+        if (completedRounds.includes(parseInt(selectedRound))) {
+            alert('❌ You have already completed this challenge!\n\nPlease select a different challenge.');
+            window.location.href = 'rounds.html';
+        }
+
+        // Color themes per challenge
+        const themes = {
+            '1': { accent: '#00d4ff', end: '#0a84ff', glow: 'rgba(0, 212, 255, 0.3)' },
+            '2': { accent: '#8338ec', end: '#b721ff', glow: 'rgba(131, 56, 236, 0.3)' },
+            '3': { accent: '#ff006e', end: '#ff4d94', glow: 'rgba(255, 0, 110, 0.3)' },
+            '4': { accent: '#ff9f1c', end: '#ffbf69', glow: 'rgba(255, 159, 28, 0.3)' }
+        };
+
+        // Populate the page
+        const theme = themes[selectedRound] || themes['1'];
+        const card = document.getElementById('entryCard');
+        card.style.setProperty('--accent-color', theme.accent);
+        card.style.setProperty('--accent-end', theme.end);
+        card.style.setProperty('--glow', theme.glow);
+
+        document.getElementById('challengeNumber').textContent = selectedRound;
+        document.getElementById('challengeLabel').textContent = selectedRound;
+        document.getElementById('teamNameDisplay').textContent = teamName;
+
+        // Set ring and button colors
+        const ring = document.getElementById('challengeRing');
+        ring.style.borderColor = theme.accent;
+        ring.style.setProperty('--glow', theme.glow);
+
+        const btn = document.getElementById('startChallengeBtn');
+        btn.style.setProperty('--accent-color', theme.accent);
+        btn.style.setProperty('--accent-end', theme.end);
+        btn.style.setProperty('--glow', theme.glow);
+
+        // Start challenge — enter fullscreen, then navigate
+        function startChallenge() {
+            const docElm = document.documentElement;
+
+            if (docElm.requestFullscreen) {
+                docElm.requestFullscreen()
+                    .then(() => {
+                        window.location.href = 'round.html';
+                    })
+                    .catch(err => {
+                        console.error('Fullscreen request failed:', err);
+                        // Navigate anyway
+                        window.location.href = 'round.html';
+                    });
+            } else if (docElm.webkitRequestFullScreen) {
+                docElm.webkitRequestFullScreen();
+                window.location.href = 'round.html';
+            } else if (docElm.mozRequestFullScreen) {
+                docElm.mozRequestFullScreen();
+                window.location.href = 'round.html';
+            } else if (docElm.msRequestFullscreen) {
+                docElm.msRequestFullscreen();
+                window.location.href = 'round.html';
+            } else {
+                // Fullscreen not supported, just navigate
+                window.location.href = 'round.html';
+            }
+        }
+
+        // Prevent back button
+        window.history.pushState(null, '', window.location.href);
+        window.onpopstate = function () {
+            window.history.pushState(null, '', window.location.href);
+        };
+    </script>
+</body>
+
+</html>

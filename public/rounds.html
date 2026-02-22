@@ -1,0 +1,939 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Flow2Data Challenge - Select Challenge</title>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Poppins:wght@300;400;500;600&display=swap"
+        rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            min-height: 100vh;
+            background: #0a0a1a;
+            overflow-x: hidden;
+            position: relative;
+        }
+
+        /* Animated Starfield Background */
+        .stars {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .star {
+            position: absolute;
+            width: 2px;
+            height: 2px;
+            background: white;
+            border-radius: 50%;
+            animation: twinkle 3s infinite ease-in-out;
+        }
+
+        @keyframes twinkle {
+
+            0%,
+            100% {
+                opacity: 0.3;
+                transform: scale(1);
+            }
+
+            50% {
+                opacity: 1;
+                transform: scale(1.2);
+            }
+        }
+
+        /* Gradient Glow Effects */
+        .glow-bg {
+            position: fixed;
+            width: 700px;
+            height: 700px;
+            border-radius: 50%;
+            filter: blur(180px);
+            opacity: 0.35;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .glow-1 {
+            top: -250px;
+            left: -200px;
+            background: linear-gradient(135deg, #00d4ff, #7b2cbf);
+            animation: float 10s infinite ease-in-out;
+        }
+
+        .glow-2 {
+            bottom: -250px;
+            right: -200px;
+            background: linear-gradient(135deg, #ff006e, #8338ec);
+            animation: float 10s infinite ease-in-out reverse;
+        }
+
+        .glow-3 {
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: linear-gradient(135deg, #00d4ff, #ff006e, #8338ec);
+            opacity: 0.2;
+            animation: pulse 6s infinite ease-in-out;
+        }
+
+        @keyframes float {
+
+            0%,
+            100% {
+                transform: translate(0, 0) scale(1);
+            }
+
+            50% {
+                transform: translate(40px, -40px) scale(1.1);
+            }
+        }
+
+        @keyframes pulse {
+
+            0%,
+            100% {
+                transform: translate(-50%, -50%) scale(1);
+                opacity: 0.2;
+            }
+
+            50% {
+                transform: translate(-50%, -50%) scale(1.2);
+                opacity: 0.3;
+            }
+        }
+
+        /* Main Container */
+        .container {
+            position: relative;
+            z-index: 1;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 40px 20px;
+        }
+
+        /* Header Section */
+        .header {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .main-title {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 3.5rem;
+            font-weight: 900;
+            background: linear-gradient(135deg, #00d4ff, #ff006e, #8338ec);
+            background-size: 300% 300%;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            letter-spacing: 5px;
+            animation: gradientShift 4s infinite ease-in-out;
+            text-shadow: 0 0 60px rgba(0, 212, 255, 0.3);
+        }
+
+        @keyframes gradientShift {
+
+            0%,
+            100% {
+                background-position: 0% 50%;
+            }
+
+            50% {
+                background-position: 100% 50%;
+            }
+        }
+
+        .subtitle {
+            font-size: 1.3rem;
+            color: #e0e0e0;
+            margin-top: 15px;
+            letter-spacing: 3px;
+            font-weight: 300;
+        }
+
+        /* Team Display */
+        .team-display {
+            background: rgba(0, 212, 255, 0.1);
+            border: 1px solid rgba(0, 212, 255, 0.3);
+            border-radius: 50px;
+            padding: 12px 30px;
+            margin-bottom: 40px;
+            backdrop-filter: blur(10px);
+        }
+
+        .team-display p {
+            color: #00d4ff;
+            font-size: 1.1rem;
+            letter-spacing: 2px;
+        }
+
+        .team-display strong {
+            color: #ffffff;
+            font-weight: 500;
+        }
+
+        #teamNameDisplay {
+            color: #ff006e;
+            font-weight: 600;
+        }
+
+        /* Fullscreen Warning */
+        .fullscreen-warning {
+            background: rgba(255, 68, 68, 0.2);
+            border: 2px solid #ff4444;
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 30px;
+            text-align: center;
+            backdrop-filter: blur(10px);
+            max-width: 600px;
+        }
+
+        .fullscreen-warning h3 {
+            color: #ff4444;
+            margin-bottom: 15px;
+        }
+
+        .fullscreen-warning p {
+            color: #ff8888;
+            font-size: 1.1em;
+            margin-bottom: 15px;
+        }
+
+        .fullscreen-warning .instruction {
+            color: #ffaaaa;
+            font-size: 0.9em;
+            margin-bottom: 20px;
+        }
+
+        .enter-fullscreen-btn {
+            padding: 12px 30px;
+            font-size: 1.1em;
+            background: linear-gradient(45deg, #ff4444, #ff6666);
+            color: white;
+            border: none;
+            border-radius: 25px;
+            cursor: pointer;
+            box-shadow: 0 4px 15px rgba(255, 68, 68, 0.4);
+            transition: all 0.3s;
+        }
+
+        .enter-fullscreen-btn:hover {
+            transform: scale(1.05);
+        }
+
+        .enter-fullscreen-btn:disabled {
+            background: linear-gradient(45deg, #44ff44, #66ff66);
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .disclaimer {
+            color: #ff8888;
+            font-size: 0.8em;
+            margin-top: 15px;
+        }
+
+        /* Challenge Grid */
+        .challenges-wrapper {
+            width: 100%;
+            max-width: 1200px;
+        }
+
+        .challenges-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 30px;
+            margin-bottom: 30px;
+        }
+
+        .challenges-grid-row2 {
+            display: flex;
+            justify-content: center;
+            gap: 30px;
+        }
+
+        /* Challenge Cards */
+        .challenge-card {
+            background: rgba(255, 255, 255, 0.03);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border-radius: 25px;
+            padding: 40px 30px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .challenge-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            border-radius: 25px;
+            padding: 2px;
+            background: linear-gradient(135deg, var(--glow-color), transparent);
+            -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+            mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+            -webkit-mask-composite: xor;
+            mask-composite: exclude;
+            opacity: 0.6;
+            transition: opacity 0.4s ease;
+        }
+
+        .challenge-card:hover {
+            transform: translateY(-10px) scale(1.02);
+        }
+
+        .challenge-card:hover::before {
+            opacity: 1;
+        }
+
+        .challenge-card.disabled {
+            opacity: 0.4;
+            cursor: not-allowed;
+            pointer-events: none;
+        }
+
+        .challenge-card.disabled .challenge-status {
+            color: #28a745;
+            font-weight: 600;
+        }
+
+        /* Challenge 1 - Cyan */
+        .challenge-1 {
+            --glow-color: #00d4ff;
+            border: 1px solid rgba(0, 212, 255, 0.2);
+            box-shadow: 0 0 30px rgba(0, 212, 255, 0.1);
+        }
+
+        .challenge-1:hover {
+            box-shadow:
+                0 20px 60px rgba(0, 212, 255, 0.3),
+                0 0 40px rgba(0, 212, 255, 0.2);
+        }
+
+        /* Challenge 2 - Purple */
+        .challenge-2 {
+            --glow-color: #8338ec;
+            border: 1px solid rgba(131, 56, 236, 0.2);
+            box-shadow: 0 0 30px rgba(131, 56, 236, 0.1);
+        }
+
+        .challenge-2:hover {
+            box-shadow:
+                0 20px 60px rgba(131, 56, 236, 0.3),
+                0 0 40px rgba(131, 56, 236, 0.2);
+        }
+
+        /* Challenge 3 - Pink */
+        .challenge-3 {
+            --glow-color: #ff006e;
+            border: 1px solid rgba(255, 0, 110, 0.2);
+            box-shadow: 0 0 30px rgba(255, 0, 110, 0.1);
+        }
+
+        .challenge-3:hover {
+            box-shadow:
+                0 20px 60px rgba(255, 0, 110, 0.3),
+                0 0 40px rgba(255, 0, 110, 0.2);
+        }
+
+        /* Challenge 4 - Golden/Orange */
+        .challenge-4 {
+            --glow-color: #ff9f1c;
+            border: 1px solid rgba(255, 159, 28, 0.2);
+            box-shadow: 0 0 30px rgba(255, 159, 28, 0.1);
+        }
+
+        .challenge-4:hover {
+            box-shadow:
+                0 20px 60px rgba(255, 159, 28, 0.3),
+                0 0 40px rgba(255, 159, 28, 0.2);
+        }
+
+        /* Neon Ring */
+        .neon-ring {
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            border: 3px solid;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 25px;
+            position: relative;
+            transition: all 0.4s ease;
+        }
+
+        .challenge-card:hover .neon-ring {
+            transform: scale(1.1);
+        }
+
+        .challenge-number {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 2.5rem;
+            font-weight: 900;
+            transition: all 0.4s ease;
+        }
+
+        .challenge-card:hover .challenge-number {
+            transform: scale(1.1);
+        }
+
+        .challenge-title {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 1.3rem;
+            color: #ffffff;
+            letter-spacing: 2px;
+            margin-bottom: 10px;
+        }
+
+        .challenge-status {
+            font-size: 0.9rem;
+            color: rgba(255, 255, 255, 0.6);
+            letter-spacing: 1px;
+        }
+
+        /* Footer */
+        .footer {
+            position: relative;
+            margin-top: 50px;
+            padding: 20px;
+            text-align: center;
+            color: rgba(255, 255, 255, 0.5);
+            font-size: 0.85rem;
+            letter-spacing: 1px;
+            z-index: 1;
+        }
+
+        /* Responsive */
+        @media (max-width: 992px) {
+            .challenges-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .main-title {
+                font-size: 2.5rem;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .challenges-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .challenges-grid-row2 {
+                flex-direction: column;
+                align-items: center;
+            }
+
+            .challenge-card {
+                max-width: 350px;
+                width: 100%;
+            }
+
+            .main-title {
+                font-size: 2rem;
+                letter-spacing: 3px;
+            }
+
+            .subtitle {
+                font-size: 1rem;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Animated Stars Background -->
+    <div class="stars" id="stars"></div>
+
+    <!-- Gradient Glow Effects -->
+    <div class="glow-bg glow-1"></div>
+    <div class="glow-bg glow-2"></div>
+    <div class="glow-bg glow-3"></div>
+
+    <div class="container">
+        <!-- Header Section -->
+        <div class="header">
+            <h1 class="main-title">Flow2Data Challenge</h1>
+            <p class="subtitle">Choose Any Challenge to Begin</p>
+        </div>
+
+        <!-- Team Display -->
+        <div class="team-display">
+            <p><strong>TEAM:</strong> <span id="teamNameDisplay"></span></p>
+        </div>
+
+        <!-- Global Timer Display (only visible when timer has started) -->
+        <div id="globalTimerDisplay" style="
+            display: none;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(0, 212, 255, 0.3);
+            border-radius: 50px;
+            padding: 10px 30px;
+            margin-bottom: 30px;
+            backdrop-filter: blur(10px);
+            text-align: center;
+        ">
+            <p style="color: rgba(255,255,255,0.7); font-size: 0.9rem; letter-spacing: 2px; margin-bottom: 5px;">⏱️ TIME
+                REMAINING</p>
+            <p id="roundsTimerValue" style="
+                font-family: 'Orbitron', sans-serif;
+                font-size: 2rem;
+                font-weight: 700;
+                color: #00d4ff;
+                letter-spacing: 3px;
+            ">--:--</p>
+        </div>
+
+
+        <!-- Challenges Grid -->
+        <div class="challenges-wrapper">
+            <!-- First Row: 3 Cards -->
+            <div class="challenges-grid">
+                <div class="challenge-card challenge-1" onclick="selectRound(1)">
+                    <div class="neon-ring">
+                        <span class="challenge-number">1</span>
+                    </div>
+                    <h3 class="challenge-title">Challenge 1</h3>
+                    <p class="challenge-status">Click to start</p>
+                </div>
+
+                <div class="challenge-card challenge-2" onclick="selectRound(2)">
+                    <div class="neon-ring">
+                        <span class="challenge-number">2</span>
+                    </div>
+                    <h3 class="challenge-title">Challenge 2</h3>
+                    <p class="challenge-status">Click to start</p>
+                </div>
+
+                <div class="challenge-card challenge-3" onclick="selectRound(3)">
+                    <div class="neon-ring">
+                        <span class="challenge-number">3</span>
+                    </div>
+                    <h3 class="challenge-title">Challenge 3</h3>
+                    <p class="challenge-status">Click to start</p>
+                </div>
+            </div>
+
+            <!-- Second Row: 1 Centered Card -->
+            <div class="challenges-grid-row2">
+                <div class="challenge-card challenge-4" onclick="selectRound(4)">
+                    <div class="neon-ring">
+                        <span class="challenge-number">4</span>
+                    </div>
+                    <h3 class="challenge-title">Challenge 4</h3>
+                    <p class="challenge-status">Click to start</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <div class="footer">
+            <p>~:Developed by:~</p>
+            <p>Vinay S H and Pavan T M</p>
+        </div>
+    </div>
+
+    <script>
+        // Generate animated stars
+        function createStars() {
+            const starsContainer = document.getElementById('stars');
+            const starCount = 150;
+
+            for (let i = 0; i < starCount; i++) {
+                const star = document.createElement('div');
+                star.className = 'star';
+                star.style.left = Math.random() * 100 + '%';
+                star.style.top = Math.random() * 100 + '%';
+                star.style.animationDelay = Math.random() * 3 + 's';
+                star.style.animationDuration = (Math.random() * 3 + 2) + 's';
+
+                const size = Math.random() * 2 + 1;
+                star.style.width = size + 'px';
+                star.style.height = size + 'px';
+
+                starsContainer.appendChild(star);
+            }
+        }
+
+        createStars();
+
+        // Check if team name exists
+        const teamName = sessionStorage.getItem('teamName');
+        if (!teamName) {
+            window.location.href = 'index.html';
+        }
+
+        // Check if team is banned
+        const bannedKey = `banned_${teamName}`;
+        if (localStorage.getItem(bannedKey) === 'true') {
+            showBanMessage();
+        }
+
+        // Display team name
+        document.getElementById('teamNameDisplay').textContent = teamName;
+
+        // Simple state tracking
+        let hasEnteredFullscreen = false;
+
+        // Show ban message function
+        function showBanMessage() {
+            document.body.innerHTML = `
+                <div style="
+                    display: flex;
+                    flex-direction: column;
+                    align-items: center;
+                    justify-content: center;
+                    height: 100vh;
+                    background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+                    color: white;
+                    font-family: Arial, sans-serif;
+                    text-align: center;
+                    padding: 20px;
+                ">
+                    <h1 style="color: #ff4444; font-size: 3em; margin-bottom: 20px;">⛔ ACCESS DENIED</h1>
+                    <p style="font-size: 1.5em; margin-bottom: 20px;">Your team has been disqualified.</p>
+                    <p style="font-size: 1.2em; color: #ff8888;">Reason: Exited full-screen mode during the competition.</p>
+                    <p style="font-size: 1em; margin-top: 30px; color: #888;">Contact the administrator if you believe this is an error.</p>
+                </div>
+            `;
+        }
+
+        // Get completed rounds from localStorage
+        const completedRounds = JSON.parse(localStorage.getItem(`completed_${teamName}`) || '[]');
+
+        // Disable completed rounds
+        function updateRoundButtons() {
+            completedRounds.forEach(roundNum => {
+                const challengeCard = document.querySelector(`.challenge-${roundNum}`);
+                if (challengeCard) {
+                    challengeCard.classList.add('disabled');
+                    challengeCard.onclick = null;
+                    const statusText = challengeCard.querySelector('.challenge-status');
+                    statusText.textContent = '✓ Completed';
+                }
+            });
+        }
+
+        // Call on page load
+        updateRoundButtons();
+
+        // Check if all 4 challenges are completed — show thank you message
+        if (completedRounds.length >= 4 && [1, 2, 3, 4].every(r => completedRounds.includes(r))) {
+            document.querySelector('.container').innerHTML = `
+                <div style="
+                    display: flex;
+                    flex-direction: column;
+                    align-items: center;
+                    justify-content: center;
+                    min-height: 80vh;
+                    text-align: center;
+                    padding: 40px 20px;
+                ">
+                    <div style="font-size: 5em; margin-bottom: 20px;">🏆</div>
+                    <h1 style="
+                        font-family: 'Orbitron', sans-serif;
+                        font-size: 3rem;
+                        font-weight: 900;
+                        background: linear-gradient(135deg, #00d4ff, #ff006e, #8338ec);
+                        background-size: 300% 300%;
+                        -webkit-background-clip: text;
+                        -webkit-text-fill-color: transparent;
+                        background-clip: text;
+                        animation: gradientShift 4s infinite ease-in-out;
+                        margin-bottom: 20px;
+                    ">Congratulations!</h1>
+                    <p style="
+                        font-size: 1.4rem;
+                        color: #e0e0e0;
+                        margin-bottom: 15px;
+                        letter-spacing: 1px;
+                    ">You have completed all 4 challenges!</p>
+                    <div style="
+                        background: rgba(255, 255, 255, 0.05);
+                        border: 1px solid rgba(0, 212, 255, 0.3);
+                        border-radius: 20px;
+                        padding: 30px 40px;
+                        margin-top: 20px;
+                        backdrop-filter: blur(10px);
+                    ">
+                        <p style="
+                            font-size: 1.8rem;
+                            color: #00d4ff;
+                            font-weight: 600;
+                            margin-bottom: 10px;
+                        ">🎉 Thank You for Participating! 🎉</p>
+                        <p style="
+                            color: rgba(255,255,255,0.6);
+                            font-size: 1.1rem;
+                            letter-spacing: 1px;
+                        ">Team: <strong style="color: #ff006e;">${teamName}</strong></p>
+                    </div>
+                    <div style="
+                        margin-top: 40px;
+                        padding: 15px 30px;
+                        border-radius: 50px;
+                        background: rgba(255, 255, 255, 0.05);
+                        border: 1px solid rgba(255, 255, 255, 0.1);
+                    ">
+                        <p style="color: rgba(255,255,255,0.5); font-size: 0.95rem;">
+                            ~:Developed by:~ Vinay S H and Pavan T M
+                        </p>
+                    </div>
+                </div>
+            `;
+        }
+
+        // Set up the enter fullscreen button
+        document.addEventListener('DOMContentLoaded', function () {
+            console.log('Rounds page loaded');
+
+            const enterBtn = document.getElementById('enterFullscreenBtn');
+            if (enterBtn) {
+                enterBtn.addEventListener('click', function () {
+                    console.log('Enter fullscreen button clicked');
+                    enterFullscreenMode();
+                });
+            }
+        });
+
+        // Function to enter fullscreen mode
+        function enterFullscreenMode() {
+            const docElm = document.documentElement;
+            console.log('Attempting to enter fullscreen...');
+
+            // Request fullscreen
+            if (docElm.requestFullscreen) {
+                docElm.requestFullscreen()
+                    .then(() => {
+                        console.log('Successfully entered fullscreen');
+                        updateButtonSuccess();
+                        startMonitoring();
+                    })
+                    .catch(err => {
+                        console.error('Failed to enter fullscreen:', err);
+                        alert('Failed to enter full-screen mode. Please click the button again or contact administrator.');
+                    });
+            } else if (docElm.mozRequestFullScreen) {
+                docElm.mozRequestFullScreen();
+                updateButtonSuccess();
+                startMonitoring();
+            } else if (docElm.webkitRequestFullScreen) {
+                docElm.webkitRequestFullScreen();
+                updateButtonSuccess();
+                startMonitoring();
+            } else if (docElm.msRequestFullscreen) {
+                docElm.msRequestFullscreen();
+                updateButtonSuccess();
+                startMonitoring();
+            } else {
+                alert('Full-screen mode is not supported in your browser. Please use a modern browser.');
+            }
+        }
+
+        // Update button after successful fullscreen
+        function updateButtonSuccess() {
+            const btn = document.getElementById('enterFullscreenBtn');
+            if (btn) {
+                btn.textContent = '✅ COMPETITION ACTIVE - FULL-SCREEN MODE';
+                btn.disabled = true;
+                hasEnteredFullscreen = true;
+            }
+        }
+
+        // Start monitoring after delay
+        function startMonitoring() {
+            console.log('Setting up monitoring...');
+            setTimeout(() => {
+                // Start checking fullscreen status
+                setInterval(checkFullscreenStatus, 1000);
+                console.log('Monitoring started');
+            }, 10000); // 10 second grace period for page load
+        }
+
+        // Simple fullscreen monitoring
+        function checkFullscreenStatus() {
+            // Only monitor if user has entered fullscreen
+            if (!hasEnteredFullscreen) {
+                return;
+            }
+
+            const isFullscreen = !!(document.fullscreenElement ||
+                document.mozFullScreenElement ||
+                document.webkitFullscreenElement ||
+                document.msFullscreenElement);
+
+            // Check if we're still on the rounds page
+            const isOnRoundsPage = window.location.pathname.includes('rounds.html');
+
+            // Ban if user exited fullscreen while on rounds page
+            if (!isFullscreen && isOnRoundsPage && teamName) {
+                console.log('User exited fullscreen - disqualifying');
+                banTeam();
+            }
+        }
+
+        // Ban team function
+        function banTeam() {
+            // Mark team as banned in localStorage
+            const bannedKey = `banned_${teamName}`;
+            localStorage.setItem(bannedKey, 'true');
+
+            // Store ban time
+            const banTimeKey = `${teamName}_ban_time`;
+            localStorage.setItem(banTimeKey, new Date().toISOString());
+
+            // Clear session data
+            sessionStorage.removeItem('teamName');
+            sessionStorage.removeItem('selectedRound');
+
+            // Show ban message
+            showBanMessage();
+        }
+
+        // Select round and navigate to challenge entry page
+        function selectRound(roundNumber) {
+            // Check if already completed
+            if (completedRounds.includes(roundNumber)) {
+                alert('❌ You have already completed this challenge!\n\nPlease select a different challenge.');
+                return;
+            }
+
+            // Store selected round
+            sessionStorage.setItem('selectedRound', roundNumber);
+
+            // Clear any existing ban before navigating - navigation is intentional
+            localStorage.removeItem(`banned_${teamName}`);
+            localStorage.removeItem(`${teamName}_ban_time`);
+
+            // Navigate to the challenge entry page (fullscreen is handled there)
+            window.location.href = 'challenge-entry.html';
+        }
+
+        // Prevent back button
+        window.history.pushState(null, '', window.location.href);
+        window.onpopstate = function () {
+            window.history.pushState(null, '', window.location.href);
+        };
+
+        // ===== GLOBAL 90-MINUTE TIMER ON ROUNDS PAGE =====
+        const GLOBAL_TIMER_SECONDS = 90 * 60;
+
+        function getGlobalTimerStartRounds() {
+            const key = `globalTimerStart_${teamName}`;
+            return localStorage.getItem(key);
+        }
+
+        function getGlobalTimeRemainingRounds() {
+            const startTime = getGlobalTimerStartRounds();
+            if (!startTime) return null; // Timer not started yet
+            const elapsed = Math.floor((Date.now() - parseInt(startTime)) / 1000);
+            return Math.max(0, GLOBAL_TIMER_SECONDS - elapsed);
+        }
+
+        function showTimeOverOnRounds() {
+            document.querySelector('.container').innerHTML = `
+                <div style="
+                    display: flex;
+                    flex-direction: column;
+                    align-items: center;
+                    justify-content: center;
+                    min-height: 80vh;
+                    text-align: center;
+                    padding: 40px 20px;
+                ">
+                    <div style="font-size: 5em; margin-bottom: 20px;">⏰</div>
+                    <h1 style="
+                        font-family: 'Orbitron', sans-serif;
+                        font-size: 3rem;
+                        font-weight: 900;
+                        color: #ff4444;
+                        margin-bottom: 20px;
+                    ">Time is Over!</h1>
+                    <p style="font-size: 1.4rem; color: #e0e0e0; margin-bottom: 15px;">
+                        The 90-minute competition time has ended.
+                    </p>
+                    <div style="
+                        background: rgba(255, 255, 255, 0.05);
+                        border: 1px solid rgba(255, 68, 68, 0.3);
+                        border-radius: 20px;
+                        padding: 25px 40px;
+                        margin-top: 20px;
+                    ">
+                        <p style="font-size: 1.3em; color: #00d4ff;">🎉 Thank You for Participating! 🎉</p>
+                    </div>
+                    <p style="margin-top: 30px; color: rgba(255,255,255,0.3); font-size: 0.9em;">~:Developed by:~ Vinay S H and Pavan T M</p>
+                </div>
+            `;
+        }
+
+        // Start global timer display on rounds page
+        function startRoundsPageTimer() {
+            const remaining = getGlobalTimeRemainingRounds();
+            if (remaining === null) {
+                // Timer not started yet — hide timer display
+                return;
+            }
+
+            if (remaining <= 0) {
+                showTimeOverOnRounds();
+                return;
+            }
+
+            // Show timer
+            const timerDiv = document.getElementById('globalTimerDisplay');
+            if (timerDiv) timerDiv.style.display = 'block';
+
+            function updateDisplay() {
+                const rem = getGlobalTimeRemainingRounds();
+                if (rem <= 0) {
+                    showTimeOverOnRounds();
+                    return;
+                }
+                const mins = Math.floor(rem / 60);
+                const secs = rem % 60;
+                const val = document.getElementById('roundsTimerValue');
+                if (val) {
+                    val.textContent = `${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
+                    if (rem <= 60) {
+                        val.style.color = '#ff4444';
+                    } else if (rem <= 300) {
+                        val.style.color = '#ffc107';
+                    }
+                }
+            }
+
+            updateDisplay();
+            setInterval(updateDisplay, 1000);
+        }
+
+        startRoundsPageTimer();
+    </script>
+</body>
+
+</html>
