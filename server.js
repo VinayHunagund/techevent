@@ -37,7 +37,9 @@ const bundledDbPath = path.join(__dirname, 'database.db');
 
 // Initialize database async
 async function initDatabase() {
-  const SQL = await initSqlJs();
+  const SQL = await initSqlJs({
+    locateFile: file => path.join(__dirname, 'node_modules', 'sql.js', 'dist', file)
+  });
 
   // Load existing database or create new one
   if (fs.existsSync(dbPath)) {
