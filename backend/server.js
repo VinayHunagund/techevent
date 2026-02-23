@@ -14,8 +14,8 @@ const useTurso = !!process.env.TURSO_DATABASE_URL;
 // Middleware
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
-app.use(express.static(path.join(__dirname, 'public')));
-app.use('/admin', express.static(path.join(__dirname, 'admin')));
+app.use(express.static(path.join(__dirname, '../frontend/public')));
+app.use('/admin', express.static(path.join(__dirname, '../frontend/admin')));
 
 // ========== DATABASE ABSTRACTION LAYER ==========
 let sqlJsDb = null;
@@ -64,7 +64,7 @@ app.use('/api', async (req, res, next) => {
 
 // Serve index.html for root path
 app.get('/', (req, res) => {
-  res.sendFile(path.join(__dirname, 'public', 'index.html'));
+  res.sendFile(path.join(__dirname, '../frontend/public', 'index.html'));
 });
 
 async function initDatabase() {
