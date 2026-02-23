@@ -497,14 +497,33 @@
                 return;
             }
 
-            // Register team on server
-            fetch('/api/register-team', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({ teamName: teamName })
-            }).then(response => response.json())
+            // First check team status from server to sync localStorage
+            fetch(`/api/team-status?teamName=${encodeURIComponent(teamName)}`)
+                .then(response => response.json())
+                .then(statusData => {
+                    if (statusData.success) {
+                        // Sync localStorage with server state
+                        // If team doesn't exist or has no submissions, clear all local data
+                        if (!statusData.teamExists || statusData.completedRounds.length === 0) {
+                            localStorage.removeItem(`completed_${teamName}`);
+                            localStorage.removeItem(`globalTimerStart_${teamName}`);
+                            localStorage.removeItem(`banned_${teamName}`);
+                            localStorage.removeItem(`${teamName}_ban_time`);
+                        } else {
+                            // Sync completed rounds with what the server actually has
+                            localStorage.setItem(`completed_${teamName}`, JSON.stringify(statusData.completedRounds));
+                        }
+                    }
+                    // Now register the team
+                    return fetch('/api/register-team', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({ teamName: teamName })
+                    });
+                })
+                .then(response => response.json())
                 .then(data => {
                     // Store team name in session storage
                     sessionStorage.setItem('teamName', teamName);

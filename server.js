@@ -247,6 +247,35 @@ function checkAnswer(userAnswer, correctAnswerData, questionType) {
   return false;
 }
 
+// API: Get team status (completed rounds)
+app.get('/api/team-status', async (req, res) => {
+  try {
+    const teamName = req.query.teamName;
+    if (!teamName || !teamName.trim()) {
+      return res.status(400).json({ success: false, message: 'Team name is required' });
+    }
+
+    const trimmedName = teamName.trim().replace(/'/g, "''");
+
+    // Check if team exists in teams table
+    const teamResult = await dbExec(`SELECT team_name FROM teams WHERE team_name = '${trimmedName}'`);
+    const teamExists = teamResult[0] && teamResult[0].values.length > 0;
+
+    // Get completed rounds from submissions table
+    const submissionsResult = await dbExec(`SELECT round_number FROM submissions WHERE team_name = '${trimmedName}'`);
+    const completedRounds = submissionsResult[0] ? submissionsResult[0].values.map(row => row[0]) : [];
+
+    res.json({
+      success: true,
+      teamExists: teamExists,
+      completedRounds: completedRounds
+    });
+  } catch (error) {
+    console.error('Error checking team status:', error);
+    res.status(500).json({ success: false, message: 'Server error' });
+  }
+});
+
 // API: Register team
 app.post('/api/register-team', async (req, res) => {
   try {
