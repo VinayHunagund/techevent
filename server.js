@@ -394,7 +394,7 @@ app.post('/api/submit', async (req, res) => {
 
   } catch (error) {
     console.error('Error submitting answers:', error);
-    res.status(500).json({ success: false, message: 'Server error during submission' });
+    res.status(500).json({ success: false, message: 'Server error during submission: ' + error.message });
   }
 });
 
