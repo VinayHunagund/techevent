@@ -153,14 +153,14 @@ async function initDatabase() {
 
     // Logic Reconstruction Question
     await dbRun(`INSERT INTO questions (round_number, question_text, type, options, correct_answer, marks) VALUES (?, ?, ?, ?, ?, ?)`,
-      [2, 'Logic Reconstruction\n\nProblem Statement:\nArrange the following shuffled steps to form a complete algorithm that determines the minimum number of platforms required at a railway station so that no train has to wait.\n\nArrival[] and Departure[] times of trains are given.\n\nJumbled Process:\nA. Initialize platforms_needed = 0 and max_platforms = 0\nB. If next arrival time \u2264 next departure time\nC. Increment platforms_needed\nD. Decrement platforms_needed\nE. Sort arrival[] and departure[] arrays separately\nF. Move arrival pointer forward\nG. Move departure pointer forward\nH. Update max_platforms = max(max_platforms, platforms_needed)\nI. Start\nJ. While both pointers are within array length\nK. Stop and print max_platforms\nL. Initialize two pointers i = 0, j = 0\n\nWrite the correct sequence (e.g., I, E, L, A, J...)',
-        'text', null, JSON.stringify(['IELAJ', 'I,E,L,A,J', 'I E L A J']), 10]);
+      [2, 'Logic Reconstruction\n\nProblem Statement:\nArrange the following shuffled steps to form a complete algorithm that determines the minimum number of platforms required at a railway station so that no train has to wait.\n\nArrival[] and Departure[] times of trains are given.\n\nJumbled Process:\nA. Initialize platforms_needed = 0 and max_platforms = 0\nB. If next arrival time \u2264 next departure time\nC. Increment platforms_needed\nD. Decrement platforms_needed\nE. Sort arrival[] and departure[] arrays separately\nF. Move arrival pointer forward\nG. Move departure pointer forward\nH. Update max_platforms = max(max_platforms, platforms_needed)\nI. Start\nJ. While both pointers are within array length\nK. Stop and print max_platforms\nL. Initialize two pointers i = 0, j = 0\n\nWrite the correct sequence.',
+        'text', null, JSON.stringify(['IEALJBCHFDGK', 'I,E,A,L,J,B,C,H,F,D,G,K', 'I E A L J B C H F D G K']), 10]);
 
     // DSA Question 2
     await dbRun(`INSERT INTO questions (round_number, question_text, type, options, correct_answer, marks) VALUES (?, ?, ?, ?, ?, ?)`,
       [2, 'DSA Problem - Question 2\n\nWhat is the output of the following code snippet?\n\nint main() {\n    static int x = 0;\n    if(x++ < 3) {\n        printf("hi ");\n        main();\n    }\n}',
         'mcq', JSON.stringify(['hi', 'hihihi', 'hihihihi', 'Infinite "hi" until crash']),
-        'hihihihi', 10]);
+        'hihihi', 10]);
 
     // ============ ROUND 3 - Cloud Data Processing Center ============
 
@@ -172,7 +172,7 @@ async function initDatabase() {
     // Question 2: Average Waiting Time
     await dbRun(`INSERT INTO questions (round_number, question_text, type, options, correct_answer, marks) VALUES (?, ?, ?, ?, ?, ?)`,
       [3, '2. Find the Average Waiting Time\n\nGiven the following jobs arriving at the server:\n\nJob ID          | Arrival Time (ms) | Processing Time (ms)\n----------------|-------------------|---------------------\nClient Job 1    | 0                 | 7\nClient Job 2    | 2                 | 4\nClient Job 3    | 4                 | 1\nClient Job 4    | 5                 | 4\nClient Job 5    | 6                 | 2\n\nUsing Shortest Remaining Time First (SRTF) scheduling, calculate the Average Waiting Time for all five jobs.',
-        'text', null, JSON.stringify(['3', '3.0', '3ms', '3 ms', '3 milliseconds']), 10]);
+        'text', null, JSON.stringify(['3.4', '3.4ms', '3.4 ms']), 10]);
 
     // Question 3: Average Turnaround Time
     await dbRun(`INSERT INTO questions (round_number, question_text, type, options, correct_answer, marks) VALUES (?, ?, ?, ?, ?, ?)`,
@@ -189,11 +189,11 @@ async function initDatabase() {
     // Flowchart 1: Right Triangle Pattern
     await dbRun(`INSERT INTO questions (round_number, question_text, type, options, correct_answer, marks) VALUES (?, ?, ?, ?, ?, ?)`,
       [4, 'Question 1: Refer to Flowchart 1\n\nSelect suitable input and describe the final output of Flowchart 1 in textual format.',
-        'text', null, JSON.stringify(['*\n**\n***\n****', '*\\n**\\n***\\n****']), 10]);
+        'text', null, JSON.stringify(['Right Angle Triangle', 'right angle triangle', 'Right angle triangle']), 10]);
 
     // Flowchart 2: Armstrong Number Check
     await dbRun(`INSERT INTO questions (round_number, question_text, type, options, correct_answer, marks) VALUES (?, ?, ?, ?, ?, ?)`,
-      [4, 'Question 2: Refer to Flowchart 2\n\nWhat is Flowchart 2 designed to determine?',
+      [4, 'Question 2: Refer to Flowchart 2\n\nWhat is Flowchart 2 designed to determine?\nWhere N = 153',
         'text', null, JSON.stringify(['Armstrong Number', 'armstrong number', 'Armstrong', 'armstrong', 'Narcissistic Number', 'narcissistic number']), 10]);
 
     // Set round timers
